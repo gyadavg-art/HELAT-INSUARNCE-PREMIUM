@@ -1407,13 +1407,13 @@ function generatePDF() {
   let headCols, colW;
   if (qr.plan && hasHP) {
     headCols = ['MEMBER','AGE','DISCOUNT','NET PREMIUM'];
-    colW     = [RW*0.42, RW*0.09, RW*0.22, RW*0.27];
+    colW     = [RW*0.40, RW*0.13, RW*0.22, RW*0.25];
   } else if (!qr.plan && hasCat) {
     headCols = ['MEMBER','AGE','BASE PREMIUM','CATARACT','TOTAL'];
-    colW     = [RW*0.30, RW*0.09, RW*0.20, RW*0.20, RW*0.21];
+    colW     = [RW*0.28, RW*0.13, RW*0.20, RW*0.19, RW*0.20];
   } else {
     headCols = ['MEMBER','AGE','NET PREMIUM'];
-    colW     = [RW*0.51, RW*0.09, RW*0.40];
+    colW     = [RW*0.47, RW*0.13, RW*0.40];
   }
 
   const hpNets = qr.memberRows.map(r=>r.hpNet||0);
