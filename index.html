@@ -840,7 +840,7 @@ function onProductChange() {
   const p = getProduct();
   document.getElementById('ybOptions').classList.toggle('hidden', p !== 'yb');
   document.getElementById('nifOptions').classList.toggle('hidden', p !== 'nif');
-  updateProductDesc(); updateZoneDesc(); renderMembers();
+  syncMembersFromDOM(); updateProductDesc(); updateZoneDesc(); renderMembers();
 }
 
 function getProduct() { return document.querySelector('input[name=product]:checked').value; }
@@ -852,7 +852,7 @@ function updateProductDesc() {
   else el.innerHTML = '<span class="info-pill">NI Floater</span> &nbsp;Floater only · SI ₹2L–₹15L · Annual premium · Per-year age pricing · UIN: NIAHLIP25039V092425';
 }
 
-function onZoneChange() { updateZoneDesc(); renderMembers(); }
+function onZoneChange() { syncMembersFromDOM(); updateZoneDesc(); renderMembers(); }
 
 function updateZoneDesc() {
   const z = document.getElementById('zone').value;
@@ -890,29 +890,44 @@ function onNIFSIChange() {
 // =============================================================================
 let _mid = 0;
 
-// Called by inline event handlers — keeps members[] in sync in real time
+// Real-time update from inline handlers
 function setMF(id, field, value) {
   const m = members.find(x => x.id === id);
   if (m) m[field] = value;
 }
 
+// Fallback DOM read — called before any re-render and before calculate
+function syncMembersFromDOM() {
+  members.forEach(m => {
+    const v = k => document.getElementById(`m${m.id}_${k}`);
+    if (v('name'))   m.name   = v('name').value;
+    if (v('age'))    m.age    = v('age').value;
+    if (v('bmi'))    m.bmi    = v('bmi').value;
+    if (v('hba1c'))  m.hba1c  = v('hba1c').value;
+    if (v('bp'))     m.bp     = v('bp').value;
+    if (v('nohosp')) m.noHosp = v('nohosp').checked;
+  });
+}
+
 function addMember() {
+  syncMembersFromDOM();
   const id = ++_mid;
   members.push({id, age:'', name:`Member ${members.length+1}`, bmi:'normal', hba1c:'normal', bp:'normal', noHosp:false});
   renderMembers();
 }
 
 function removeMember(id) {
+  syncMembersFromDOM();
   members = members.filter(m => m.id !== id);
   renderMembers();
 }
 
-// members[] is always current — no DOM read needed
 function collectMembers() {
+  syncMembersFromDOM(); // always pull latest DOM values
   return members.map(m => ({
     id:     m.id,
     name:   m.name   || 'Member',
-    age:    parseInt(m.age)  || 0,
+    age:    parseInt(m.age) || 0,
     bmi:    m.bmi    || 'normal',
     hba1c:  m.hba1c  || 'normal',
     bp:     m.bp     || 'normal',
@@ -932,28 +947,28 @@ function renderMembers() {
         ${members.length>1 ? `<button class="btn btn-danger btn-sm" onclick="removeMember(${m.id})">✕ Remove</button>` : ''}
       </div>
       <div class="form-grid">
-        <div class="form-group"><span class="form-label">Name / Relation</span><input type="text" value="${m.name||''}" placeholder="e.g. Self, Spouse, Son" oninput="setMF(${m.id},'name',this.value)"></div>
-        <div class="form-group"><span class="form-label">Age (years)</span><input type="number" value="${m.age||''}" min="0" max="120" placeholder="Age in years" oninput="setMF(${m.id},'age',this.value)"></div>
+        <div class="form-group"><span class="form-label">Name / Relation</span><input type="text" id="m${m.id}_name" value="${m.name||''}" placeholder="e.g. Self, Spouse, Son" oninput="setMF(${m.id},'name',this.value)"></div>
+        <div class="form-group"><span class="form-label">Age (years)</span><input type="number" id="m${m.id}_age" value="${m.age||''}" min="0" max="120" placeholder="Age in years" oninput="setMF(${m.id},'age',this.value)"></div>
       </div>
       ${showHP ? `<div style="background:rgba(37,99,168,.06);border-radius:8px;padding:10px 12px;margin-top:4px">
         <div style="font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Health Parameters (18+ only · affects discount / loading)</div>
         <div class="form-grid" style="grid-template-columns:repeat(auto-fit,minmax(165px,1fr))">
           <div class="form-group"><span class="form-label">BMI</span>
-            <select onchange="setMF(${m.id},'bmi',this.value)">
+            <select id="m${m.id}_bmi" onchange="setMF(${m.id},'bmi',this.value)">
               <option value="good" ${m.bmi==='good'?'selected':''}>18.5–32 &nbsp;(−2.5%)</option>
               <option value="normal" ${(m.bmi||'normal')==='normal'?'selected':''}>Not specified (0%)</option>
               <option value="high" ${m.bmi==='high'?'selected':''}>Above 32 &nbsp;(+2.5%)</option>
             </select>
           </div>
           <div class="form-group"><span class="form-label">HbA1c / Diabetes</span>
-            <select onchange="setMF(${m.id},'hba1c',this.value)">
+            <select id="m${m.id}_hba1c" onchange="setMF(${m.id},'hba1c',this.value)">
               <option value="good" ${m.hba1c==='good'?'selected':''}>Non-diabetic &lt;6.4 (−2.5%)</option>
               <option value="normal" ${(m.hba1c||'normal')==='normal'?'selected':''}>Not specified (0%)</option>
               <option value="high" ${m.hba1c==='high'?'selected':''}>Diabetic &gt;6.4 (+2.5%)</option>
             </select>
           </div>
           <div class="form-group"><span class="form-label">Blood Pressure</span>
-            <select onchange="setMF(${m.id},'bp',this.value)">
+            <select id="m${m.id}_bp" onchange="setMF(${m.id},'bp',this.value)">
               <option value="good" ${m.bp==='good'?'selected':''}>≤120/80 &nbsp;(−2.5%)</option>
               <option value="normal" ${(m.bp||'normal')==='normal'?'selected':''}>120–139/89 (0%)</option>
               <option value="high" ${m.bp==='high'?'selected':''}>Above 139/89 (+2.5%)</option>
@@ -961,7 +976,7 @@ function renderMembers() {
           </div>
           <div class="form-group" style="justify-content:flex-end">
             <label class="choice-pill" style="margin-top:18px;font-size:12px">
-              <input type="checkbox" ${m.noHosp?'checked':''} onchange="setMF(${m.id},'noHosp',this.checked)"> No hosp. last 3 yrs (−2.5%)
+              <input type="checkbox" id="m${m.id}_nohosp" ${m.noHosp?'checked':''} onchange="setMF(${m.id},'noHosp',this.checked)"> No hosp. last 3 yrs (−2.5%)
             </label>
           </div>
         </div>
