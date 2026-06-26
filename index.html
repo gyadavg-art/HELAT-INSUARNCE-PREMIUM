@@ -3,171 +3,238 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Insurance Premium Calculator – New India Assurance</title>
+<title>UP38-संभल | स्वास्थ्य बीमा प्रीमियम</title>
 <style>
+:root{
+  --primary:#1e3a5f;--primary-light:#2563a8;--primary-dark:#0f2240;
+  --accent:#f59e0b;--accent2:#10b981;--accent3:#8b5cf6;
+  --danger:#ef4444;--bg:#f1f5f9;--card:#ffffff;
+  --text:#1e293b;--muted:#64748b;--border:#e2e8f0;
+  --shadow:0 4px 20px rgba(0,0,0,.08);--radius:14px;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a2533;font-size:14px}
-.container{max-width:960px;margin:0 auto;padding:20px}
-header{background:linear-gradient(135deg,#1a2e4a,#2563a8);color:#fff;padding:18px 24px;border-radius:10px;margin-bottom:20px;display:flex;align-items:center;gap:16px}
-header .logo{width:56px;height:56px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:#1a2e4a}
-header h1{font-size:20px;font-weight:700;line-height:1.3}
-header p{font-size:12px;opacity:.8;margin-top:2px}
-.card{background:#fff;border-radius:10px;padding:20px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-.card h2{font-size:14px;font-weight:700;color:#1a2e4a;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e8f0fe;display:flex;align-items:center;gap:8px}
-.card h2 .step{background:#2563a8;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
-.radio-group,.check-group{display:flex;flex-wrap:wrap;gap:8px}
-.radio-group label,.check-group label{display:flex;align-items:center;gap:6px;padding:7px 14px;border:2px solid #d1d8e0;border-radius:7px;cursor:pointer;transition:.15s;font-size:13px;user-select:none}
-.radio-group label:hover,.check-group label:hover{border-color:#2563a8;background:#f0f6ff}
-.radio-group input[type=radio]:checked+span,.check-group input[type=checkbox]:checked+span{color:#2563a8;font-weight:600}
-input[type=radio]:checked~span,.radio-group input[type=radio]:checked+span{color:#2563a8}
-label:has(input:checked){border-color:#2563a8!important;background:#f0f6ff!important}
-select,input[type=number],input[type=text]{width:100%;padding:8px 10px;border:1.5px solid #d1d8e0;border-radius:7px;font-size:13px;outline:none;transition:.15s;background:#fff}
-select:focus,input:focus{border-color:#2563a8;box-shadow:0 0 0 3px rgba(37,99,168,.12)}
-.form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:12px}
-.form-group{display:flex;flex-direction:column;gap:4px}
-.form-group label{font-size:12px;font-weight:600;color:#4a5568}
-.member-row{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:#f8faff;border:1.5px solid #e2e8f0;border-radius:8px;padding:10px 14px;margin-bottom:8px}
-.member-row .member-name{font-size:13px;font-weight:600;color:#2563a8;min-width:80px}
-.member-row .member-health{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:6px;margin-top:8px}
-.member-row .health-row{display:contents}
-.member-block{background:#f8faff;border:1.5px solid #e2e8f0;border-radius:8px;padding:10px 14px;margin-bottom:8px}
-.member-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.member-header h3{font-size:13px;font-weight:600;color:#2563a8}
-.btn{padding:8px 18px;border:none;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;transition:.15s}
-.btn-primary{background:#2563a8;color:#fff}
-.btn-primary:hover{background:#1a4d8a}
-.btn-danger{background:#dc2626;color:#fff}
-.btn-danger:hover{background:#b91c1c}
-.btn-outline{background:#fff;color:#2563a8;border:2px solid #2563a8}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
+
+/* ── HEADER ── */
+.site-header{background:linear-gradient(135deg,var(--primary-dark) 0%,var(--primary) 50%,var(--primary-light) 100%);padding:0;position:relative;overflow:hidden;margin-bottom:24px}
+.site-header::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.header-inner{max-width:960px;margin:0 auto;padding:20px 24px;display:flex;align-items:center;gap:18px;position:relative}
+.logo-badge{width:60px;height:60px;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.3);border-radius:14px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);flex-shrink:0}
+.logo-badge svg{width:32px;height:32px;fill:#fff}
+.header-text h1{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.3px;line-height:1.2}
+.header-text p{font-size:12px;color:rgba(255,255,255,.65);margin-top:3px}
+.header-pills{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.pill{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.9);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;backdrop-filter:blur(4px)}
+
+/* ── LAYOUT ── */
+.container{max-width:960px;margin:0 auto;padding:0 20px 40px}
+
+/* ── CARDS ── */
+.card{background:var(--card);border-radius:var(--radius);padding:22px 24px;margin-bottom:16px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.card-title{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #f0f4f8;display:flex;align-items:center;gap:10px}
+.step-badge{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;box-shadow:0 2px 6px rgba(37,99,168,.35)}
+.step-badge.amber{background:linear-gradient(135deg,#d97706,#f59e0b)}
+.step-badge.emerald{background:linear-gradient(135deg,#059669,#10b981)}
+
+/* ── FORM ── */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:14px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+input[type=text],input[type=number],select{
+  width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;
+  font-size:13px;outline:none;transition:.15s;background:#fff;color:var(--text);
+}
+input:focus,select:focus{border-color:var(--primary-light);box-shadow:0 0 0 3px rgba(37,99,168,.1)}
+
+/* ── RADIO / CHECKBOX PILLS ── */
+.choice-group{display:flex;flex-wrap:wrap;gap:8px}
+.choice-pill{display:flex;align-items:center;gap:7px;padding:8px 16px;border:2px solid var(--border);border-radius:9px;cursor:pointer;font-size:13px;user-select:none;transition:.15s;background:#fff;font-weight:500}
+.choice-pill:hover{border-color:var(--primary-light);background:#f0f6ff}
+.choice-pill:has(input:checked){border-color:var(--primary-light)!important;background:linear-gradient(135deg,#eff6ff,#dbeafe)!important;color:var(--primary);font-weight:600}
+.choice-pill input{accent-color:var(--primary-light)}
+
+/* ── MEMBER BLOCK ── */
+.member-block{background:linear-gradient(135deg,#f8faff,#f0f4ff);border:1.5px solid #dde5f8;border-radius:11px;padding:14px 16px;margin-bottom:10px}
+.member-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.member-label{font-size:13px;font-weight:700;color:var(--primary);display:flex;align-items:center;gap:7px}
+.member-num{background:var(--primary);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+
+/* ── BUTTONS ── */
+.btn{padding:9px 20px;border:none;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;transition:.15s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;box-shadow:0 4px 14px rgba(37,99,168,.3)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(37,99,168,.4)}
+.btn-danger{background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff}
+.btn-danger:hover{transform:translateY(-1px)}
+.btn-outline{background:#fff;color:var(--primary);border:2px solid var(--primary-light)}
 .btn-outline:hover{background:#f0f6ff}
-.btn-success{background:#059669;color:#fff}
-.btn-success:hover{background:#047857}
-.btn-lg{padding:12px 28px;font-size:15px}
+.btn-success{background:linear-gradient(135deg,#047857,#10b981);color:#fff;box-shadow:0 4px 14px rgba(16,185,129,.3)}
+.btn-success:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(16,185,129,.4)}
+.btn-amber{background:linear-gradient(135deg,#d97706,#f59e0b);color:#fff;box-shadow:0 4px 14px rgba(245,158,11,.3)}
+.btn-amber:hover{transform:translateY(-1px)}
+.btn-lg{padding:13px 32px;font-size:15px;border-radius:11px}
+.btn-sm{padding:5px 12px;font-size:12px}
+
+/* ── ACTION BAR ── */
+.action-bar{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:20px 0}
+
+/* ── RESULT CARD ── */
+.result-wrap{background:linear-gradient(160deg,var(--primary-dark) 0%,var(--primary) 60%,#1d4ed8 100%);border-radius:var(--radius);padding:24px;margin-bottom:16px;box-shadow:0 8px 32px rgba(30,58,95,.3)}
+.result-wrap h2{color:#fff;font-size:16px;font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.result-meta{font-size:12px;color:rgba(255,255,255,.65);margin-bottom:16px;line-height:1.7}
+.result-meta span{display:inline-block;background:rgba(255,255,255,.12);padding:2px 10px;border-radius:5px;margin:2px 2px 2px 0;font-weight:600;color:rgba(255,255,255,.9)}
+.rtable{width:100%;border-collapse:collapse;font-size:13px}
+.rtable th{background:rgba(255,255,255,.12);padding:9px 12px;text-align:left;font-weight:600;color:rgba(255,255,255,.9);font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+.rtable td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.9)}
+.rtable tbody tr:hover td{background:rgba(255,255,255,.05)}
+.rt-sub td{border-top:1px solid rgba(255,255,255,.15)!important;font-weight:700;color:#fff}
+.rt-disc td{color:#6ee7b7}
+.rt-total td{background:rgba(255,215,0,.12);border-top:2px solid rgba(255,215,0,.4)!important;font-weight:800;font-size:15px;color:#ffd700}
+
+/* ── COMMISSION CARDS ── */
+.commission-section{background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);border-radius:var(--radius);padding:24px;margin-bottom:16px;box-shadow:0 8px 32px rgba(0,0,0,.25)}
+.comm-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.comm-title{font-size:16px;font-weight:800;color:#fff;display:flex;align-items:center;gap:10px}
+.comm-title-icon{width:36px;height:36px;background:linear-gradient(135deg,#d97706,#f59e0b);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.comm-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:rgba(255,255,255,.7);font-weight:600;user-select:none}
+.toggle-switch{width:44px;height:24px;background:rgba(255,255,255,.2);border-radius:12px;position:relative;transition:.3s;flex-shrink:0}
+.toggle-switch.on{background:var(--accent)}
+.toggle-switch::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.toggle-switch.on::after{transform:translateX(20px)}
+#commRealToggle{display:none}
+
+.comm-tag{display:inline-block;background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.4);color:#fcd34d;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:16px}
+.comm-band{font-size:12px;color:rgba(255,255,255,.5);margin-bottom:16px}
+.comm-band strong{color:rgba(255,255,255,.9)}
+
+.stat-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.stat-card{border-radius:12px;padding:18px 16px;text-align:center;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:.15}
+.stat-card.blue{background:linear-gradient(135deg,#1d4ed8,#3b82f6)}
+.stat-card.blue::before{background:#93c5fd}
+.stat-card.green{background:linear-gradient(135deg,#047857,#10b981)}
+.stat-card.green::before{background:#6ee7b7}
+.stat-card.gold{background:linear-gradient(135deg,#92400e,#d97706)}
+.stat-card.gold::before{background:#fcd34d}
+.stat-pct{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.stat-amt{font-size:26px;font-weight:900;color:#fff;line-height:1;margin-bottom:4px;letter-spacing:-1px}
+.stat-label{font-size:11.5px;color:rgba(255,255,255,.6);font-weight:600}
+.stat-badge{display:inline-block;background:rgba(255,255,255,.15);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;color:#fff;margin-top:6px}
+.comm-total-bar{background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.2);border-radius:10px;padding:14px 18px;margin-top:16px;display:flex;justify-content:space-between;align-items:center}
+.comm-total-label{font-size:13px;color:rgba(255,255,255,.7);font-weight:600}
+.comm-total-val{font-size:22px;font-weight:900;color:#ffd700}
+
+/* ── MISC ── */
 .hidden{display:none!important}
-.result-card{background:linear-gradient(135deg,#1a2e4a,#2563a8);color:#fff;border-radius:10px;padding:22px;margin-bottom:16px}
-.result-card h2{color:#fff;border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:10px;margin-bottom:14px}
-.result-table{width:100%;border-collapse:collapse;font-size:13px}
-.result-table th{background:rgba(255,255,255,.15);padding:8px 10px;text-align:left;font-weight:600}
-.result-table td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.1)}
-.result-table tr:last-child td{border-bottom:none}
-.total-row td{font-weight:700;font-size:15px;color:#ffd700;border-top:2px solid rgba(255,255,255,.3)!important}
-.discount-row td{color:#86efac}
-.note-box{background:#fffbeb;border:1.5px solid #f59e0b;border-radius:8px;padding:12px 16px;font-size:13px;color:#92400e;margin-bottom:12px}
-.note-box strong{display:block;margin-bottom:4px}
-.info-badge{display:inline-block;background:#dbeafe;color:#1e40af;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:600}
-.agent-input-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-hr{border:none;border-top:1px solid #e2e8f0;margin:14px 0}
-.flex-end{display:flex;justify-content:flex-end;gap:10px;margin-top:12px}
-.flex-center{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:16px}
-.tag{display:inline-block;background:#e0f2fe;color:#0369a1;border-radius:4px;padding:1px 7px;font-size:11px;font-weight:600}
+.info-pill{display:inline-block;background:#dbeafe;color:#1e40af;border-radius:5px;padding:2px 9px;font-size:11px;font-weight:700}
+.warn-box{background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1.5px solid #fcd34d;border-radius:10px;padding:12px 16px;font-size:12.5px;color:#92400e;margin-bottom:12px;display:flex;gap:10px;align-items:flex-start}
+.warn-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+@media(max-width:600px){.stat-cards{grid-template-columns:1fr}.header-pills{display:none}}
 @media print{
   body{background:#fff}
   .no-print{display:none!important}
   .container{padding:0}
-  header{border-radius:0}
-  .card,.result-card{box-shadow:none;page-break-inside:avoid}
+  .site-header{margin-bottom:16px}
+  .card,.result-wrap,.commission-section{box-shadow:none;page-break-inside:avoid}
 }
 </style>
 </head>
 <body>
+
+<div class="site-header">
+  <div class="header-inner">
+    <div class="logo-badge">
+      <svg viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7L12 2zm0 2.18L19 8v8l-7 3.88L5 16V8l7-3.82z"/><path d="M12 6l-4 2.2V14l4 2.2 4-2.2V8.2L12 6z" opacity=".6"/></svg>
+    </div>
+    <div class="header-text">
+      <h1>UP38- संभल</h1>
+      <p>स्वास्थ्य बीमा प्रीमियम कैलकुलेटर</p>
+    </div>
+    <div class="header-pills">
+      <span class="pill">GST: शून्य</span>
+      <span class="pill">Fresh Quote</span>
+    </div>
+  </div>
+</div>
+
 <div class="container">
 
-<header>
-  <div class="logo">NIA</div>
-  <div>
-    <h1>UP38- संभल (स्वास्थ्य -बीमा प्रीमियम )</h1>
-  </div>
-</header>
-
-<!-- Agent Details -->
-<div class="card no-print" id="agentSection">
-  <h2><span class="step">A</span>Agent &amp; Customer Details</h2>
-  <div class="agent-input-row">
-    <div class="form-group"><label>Agent / Firm Name</label><input type="text" id="agentName" placeholder="e.g. ABC Insurance Brokers"></div>
-    <div class="form-group"><label>Agent Code (optional)</label><input type="text" id="agentCode" placeholder="e.g. AGT12345"></div>
-  </div>
-  <div class="agent-input-row">
-    <div class="form-group"><label>Customer Name</label><input type="text" id="custName" placeholder="Prospective customer name"></div>
-    <div class="form-group"><label>Customer Contact (optional)</label><input type="text" id="custContact" placeholder="Phone / Email"></div>
+<!-- Agent & Customer -->
+<div class="card no-print">
+  <div class="card-title"><span class="step-badge">A</span>Agent &amp; Customer Details</div>
+  <div class="form-grid">
+    <div class="form-group"><span class="form-label">Agent / Firm Name</span><input type="text" id="agentName" placeholder="e.g. Ravi Kumar – LIC Agent"></div>
+    <div class="form-group"><span class="form-label">Agent Code</span><input type="text" id="agentCode" placeholder="Optional"></div>
+    <div class="form-group"><span class="form-label">Customer Name</span><input type="text" id="custName" placeholder="Prospective customer name"></div>
+    <div class="form-group"><span class="form-label">Contact</span><input type="text" id="custContact" placeholder="Phone / Email (optional)"></div>
   </div>
 </div>
 
-<!-- Step 1: Product -->
+<!-- Step 1 -->
 <div class="card no-print">
-  <h2><span class="step">1</span>Select Product</h2>
-  <div class="radio-group">
-    <label><input type="radio" name="product" value="yb" checked onchange="onProductChange()"><span>Yuva Bharat Health Policy</span></label>
-    <label><input type="radio" name="product" value="nif" onchange="onProductChange()"><span>New India Floater Mediclaim Policy</span></label>
+  <div class="card-title"><span class="step-badge">1</span>Select Product</div>
+  <div class="choice-group">
+    <label class="choice-pill"><input type="radio" name="product" value="yb" checked onchange="onProductChange()"><span>🏥 Yuva Bharat Health Policy</span></label>
+    <label class="choice-pill"><input type="radio" name="product" value="nif" onchange="onProductChange()"><span>🏨 NI Floater Mediclaim Policy</span></label>
   </div>
-  <div id="productDesc" style="margin-top:10px;font-size:12px;color:#4a5568"></div>
+  <div id="productDesc" style="margin-top:10px;font-size:12px;color:var(--muted)"></div>
 </div>
 
-<!-- Step 2: Zone -->
+<!-- Step 2 -->
 <div class="card no-print">
-  <h2><span class="step">2</span>Select Zone</h2>
-  <div class="form-row">
+  <div class="card-title"><span class="step-badge">2</span>Select Zone</div>
+  <div class="form-grid" style="grid-template-columns:220px 1fr">
     <div class="form-group">
-      <label>Zone</label>
+      <span class="form-label">Zone</span>
       <select id="zone" onchange="onZoneChange()">
         <option value="z1">Zone 1</option>
         <option value="z2">Zone 2</option>
       </select>
     </div>
-    <div class="form-group" style="justify-content:flex-end;padding-top:20px">
-      <div id="zoneDesc" style="font-size:12px;color:#4a5568"></div>
+    <div class="form-group" style="justify-content:flex-end">
+      <div id="zoneDesc" style="font-size:12.5px;color:var(--muted);padding-top:22px;line-height:1.6"></div>
     </div>
   </div>
 </div>
 
-<!-- Step 3: Members -->
+<!-- Step 3 -->
 <div class="card no-print">
-  <h2><span class="step">3</span>Member Details</h2>
+  <div class="card-title"><span class="step-badge">3</span>Member Details</div>
   <div id="membersContainer"></div>
-  <button class="btn btn-outline" onclick="addMember()">+ Add Member</button>
+  <button class="btn btn-outline btn-sm" onclick="addMember()" style="margin-top:4px">+ Add Member</button>
 </div>
 
-<!-- Step 4a: YB Plan Options -->
+<!-- Step 4a YB -->
 <div class="card no-print" id="ybOptions">
-  <h2><span class="step">4</span>Plan Options (Yuva Bharat)</h2>
-  <div class="form-row">
-    <div class="form-group">
-      <label>Plan</label>
+  <div class="card-title"><span class="step-badge">4</span>Plan Options – Yuva Bharat</div>
+  <div class="form-grid">
+    <div class="form-group"><span class="form-label">Plan</span>
       <select id="ybPlan" onchange="onYBPlanChange()">
         <option value="Basic">Basic</option>
         <option value="Gold">Gold</option>
         <option value="Platinum">Platinum</option>
       </select>
     </div>
-    <div class="form-group">
-      <label>Sum Insured</label>
+    <div class="form-group"><span class="form-label">Sum Insured</span>
       <select id="ybSI">
-        <option value="0">₹5 Lakh</option>
-        <option value="1" selected>₹10 Lakh</option>
-        <option value="2">₹15 Lakh</option>
-        <option value="3">₹25 Lakh</option>
-        <option value="4">₹50 Lakh</option>
-        <option value="5">₹75 Lakh</option>
+        <option value="0">₹5 Lakh</option><option value="1" selected>₹10 Lakh</option>
+        <option value="2">₹15 Lakh</option><option value="3">₹25 Lakh</option>
+        <option value="4">₹50 Lakh</option><option value="5">₹75 Lakh</option>
         <option value="6">₹1 Crore</option>
       </select>
     </div>
-    <div class="form-group">
-      <label>Coverage Type</label>
+    <div class="form-group"><span class="form-label">Coverage</span>
       <select id="ybCoverage">
         <option value="individual">Individual (per member SI)</option>
         <option value="floater">Family Floater (shared SI)</option>
       </select>
     </div>
-    <div class="form-group">
-      <label>Payment Mode</label>
+    <div class="form-group"><span class="form-label">Payment Mode</span>
       <select id="ybMode">
-        <option value="annual">Annual</option>
-        <option value="hy">Half-Yearly</option>
-        <option value="quarterly">Quarterly</option>
-        <option value="monthly">Monthly</option>
+        <option value="annual">Annual</option><option value="hy">Half-Yearly</option>
+        <option value="quarterly">Quarterly</option><option value="monthly">Monthly</option>
       </select>
     </div>
-    <div class="form-group">
-      <label>Policy Term</label>
+    <div class="form-group"><span class="form-label">Policy Term</span>
       <select id="ybTerm">
         <option value="1">1 Year</option>
         <option value="2">2 Years (−5%)</option>
@@ -175,47 +242,38 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:14px 0}
       </select>
     </div>
   </div>
-  <!-- Loyalty -->
-  <div class="form-group" style="margin-top:8px">
-    <label>Discounts</label>
-    <div class="check-group">
-      <label><input type="checkbox" id="ybLoyalty"><span>Loyalty Discount −2.5% (existing NIA policy ≥₹5,000 premium)</span></label>
+  <div class="form-group" style="margin-top:4px">
+    <span class="form-label">Discount</span>
+    <div class="choice-group">
+      <label class="choice-pill"><input type="checkbox" id="ybLoyalty"><span>Loyalty −2.5% (existing NIA policy ≥₹5,000)</span></label>
     </div>
   </div>
-  <!-- Maternity optional (Platinum only) -->
-  <div id="ybMaternitySection" class="hidden" style="margin-top:12px">
-    <label style="font-size:12px;font-weight:600;color:#4a5568">Optional Cover: Enhanced Maternity (Platinum Only)</label>
-    <div class="check-group" style="margin-top:6px">
-      <label><input type="checkbox" id="ybMaternity" onchange="onYBMaternityChange()"><span>Add Enhanced Maternity Cover</span></label>
+  <div id="ybMaternitySection" class="hidden" style="margin-top:14px">
+    <span class="form-label">Optional Cover (Platinum)</span>
+    <div class="choice-group" style="margin-top:6px">
+      <label class="choice-pill"><input type="checkbox" id="ybMaternity" onchange="onYBMaternityChange()"><span>Enhanced Maternity Cover</span></label>
     </div>
-    <div id="ybMaternityLimit" class="hidden" style="margin-top:8px">
+    <div id="ybMaternityLimit" class="hidden" style="margin-top:8px;max-width:220px">
       <select id="ybMaternityLimitVal">
-        <option value="0">₹50,000</option>
-        <option value="1">₹75,000</option>
-        <option value="2">₹1,00,000</option>
+        <option value="0">₹50,000</option><option value="1">₹75,000</option><option value="2">₹1,00,000</option>
       </select>
     </div>
   </div>
 </div>
 
-<!-- Step 4b: NIF Options -->
+<!-- Step 4b NIF -->
 <div class="card no-print hidden" id="nifOptions">
-  <h2><span class="step">4</span>Plan Options (NI Floater Mediclaim)</h2>
-  <div class="form-row">
-    <div class="form-group">
-      <label>Sum Insured</label>
+  <div class="card-title"><span class="step-badge">4</span>Plan Options – NI Floater Mediclaim</div>
+  <div class="form-grid">
+    <div class="form-group"><span class="form-label">Sum Insured</span>
       <select id="nifSI" onchange="onNIFSIChange()">
-        <option value="0">₹2 Lakh</option>
-        <option value="1">₹3 Lakh</option>
-        <option value="2">₹5 Lakh</option>
-        <option value="3">₹8 Lakh</option>
-        <option value="4" selected>₹10 Lakh</option>
-        <option value="5">₹12 Lakh</option>
+        <option value="0">₹2 Lakh</option><option value="1">₹3 Lakh</option>
+        <option value="2">₹5 Lakh</option><option value="3">₹8 Lakh</option>
+        <option value="4" selected>₹10 Lakh</option><option value="5">₹12 Lakh</option>
         <option value="6">₹15 Lakh</option>
       </select>
     </div>
-    <div class="form-group">
-      <label>Policy Term</label>
+    <div class="form-group"><span class="form-label">Policy Term</span>
       <select id="nifTerm">
         <option value="1">1 Year</option>
         <option value="2">2 Years (−5%)</option>
@@ -223,31 +281,29 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:14px 0}
       </select>
     </div>
   </div>
-  <div class="note-box" id="nifCoPayNote" style="margin-top:0">
-    <strong>Co-payment Note</strong>
-    If Zone 2 insured members avail treatment at Zone 1 (Maharashtra/Gujarat) hospitals, a 20% co-payment applies.
-  </div>
-  <!-- Cataract optional -->
+  <div class="warn-box"><span class="warn-icon">⚠️</span><span><strong>Co-payment:</strong> If Zone 2 insured members avail treatment at Zone 1 (Maharashtra / Gujarat) hospitals, a <strong>20% co-payment</strong> applies.</span></div>
   <div id="nifCataractSection" class="hidden">
-    <label style="font-size:12px;font-weight:600;color:#4a5568">Optional Cover: Revision in Limit of Cataract (SI ≥₹8 Lakh)</label>
-    <div class="check-group" style="margin-top:6px">
-      <label><input type="checkbox" id="nifCataract"><span>Add Cataract Optional Cover</span></label>
+    <span class="form-label">Optional Cover (SI ≥ ₹8 Lakh)</span>
+    <div class="choice-group" style="margin-top:6px">
+      <label class="choice-pill"><input type="checkbox" id="nifCataract"><span>Revision in Limit of Cataract</span></label>
     </div>
   </div>
 </div>
 
-<!-- Calculate -->
-<div class="flex-center no-print">
-  <button class="btn btn-primary btn-lg" onclick="calculate()">Calculate Premium</button>
-  <button class="btn btn-outline btn-lg" onclick="resetForm()">Reset</button>
+<!-- Actions -->
+<div class="action-bar no-print">
+  <button class="btn btn-primary btn-lg" onclick="calculate()">⚡ Calculate Premium</button>
+  <button class="btn btn-outline" onclick="resetForm()">↺ Reset</button>
 </div>
 
 <!-- Results -->
 <div id="resultsSection" class="hidden">
-  <div class="result-card">
-    <h2>Premium Quotation</h2>
-    <div id="quoteHeader" style="font-size:13px;margin-bottom:12px;opacity:.85"></div>
-    <table class="result-table" id="quoteTable">
+
+  <!-- Quote Result -->
+  <div class="result-wrap">
+    <h2>📋 Premium Quotation</h2>
+    <div id="quoteHeader" class="result-meta"></div>
+    <table class="rtable">
       <thead><tr id="quoteTableHead"></tr></thead>
       <tbody id="quoteTableBody"></tbody>
     </table>
@@ -255,38 +311,59 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:14px 0}
 
   <div id="quoteNotes"></div>
 
-  <!-- Commission Section -->
-  <div class="card" id="commissionCard" style="border:2px solid #f59e0b;margin-top:4px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <h2 style="border-bottom:none;margin-bottom:0"><span class="step" style="background:#f59e0b">₹</span>Agent Commission &amp; Incentive</h2>
-      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;font-weight:600;color:#92400e">
-        <input type="checkbox" id="showCommission" onchange="toggleCommission()"> Show Commission
+  <!-- Commission -->
+  <div class="commission-section">
+    <div class="comm-header">
+      <div class="comm-title">
+        <div class="comm-title-icon">💰</div>
+        Agent Commission &amp; Incentive
+      </div>
+      <label class="comm-toggle" onclick="toggleCommission()">
+        <input type="checkbox" id="showCommission" id="commRealToggle" style="display:none">
+        <div class="toggle-switch" id="toggleViz"></div>
+        <span id="toggleLabel">Show</span>
       </label>
     </div>
     <div id="commissionBody" class="hidden">
-      <div style="font-size:12px;color:#6b7280;margin-bottom:10px">Assuming <strong>Fresh Business</strong> · Commission rates as per IRDAI circular</div>
-      <table class="result-table" id="commissionTable" style="background:linear-gradient(135deg,#78350f,#b45309);border-radius:8px;overflow:hidden">
-        <thead><tr>
-          <th>Age of Oldest Member</th>
-          <th>Business Type</th>
-          <th>Total Premium (₹)</th>
-          <th>Commission @15%</th>
-          <th>Incentive</th>
-          <th>Total Award</th>
-        </tr></thead>
-        <tbody id="commissionBody2"></tbody>
-      </table>
+      <div class="comm-tag">✓ Fresh Business</div>
+      <div class="comm-band">Oldest insured age: <strong id="commOldestAge">—</strong> &nbsp;·&nbsp; Rate band: <strong id="commBand">—</strong></div>
+      <div class="stat-cards">
+        <div class="stat-card blue">
+          <div class="stat-pct">Commission</div>
+          <div class="stat-amt" id="sc1">₹0</div>
+          <div class="stat-label">@15% of Premium</div>
+          <div class="stat-badge" id="sb1">15%</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-pct">Incentive</div>
+          <div class="stat-amt" id="sc2">₹0</div>
+          <div class="stat-label">Performance Incentive</div>
+          <div class="stat-badge" id="sb2">0%</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-pct">Total Award</div>
+          <div class="stat-amt" id="sc3">₹0</div>
+          <div class="stat-label">Commission + Incentive</div>
+          <div class="stat-badge" id="sb3">0%</div>
+        </div>
+      </div>
+      <div class="comm-total-bar">
+        <div>
+          <div class="comm-total-label">Net Premium Basis</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:2px">Total premium on which commission is calculated</div>
+        </div>
+        <div class="comm-total-val" id="scBase">₹0</div>
+      </div>
     </div>
   </div>
 
-  <div class="flex-center no-print">
-    <button class="btn btn-success btn-lg" onclick="generatePDF()">📄 Download PDF Quotation</button>
+  <div class="action-bar no-print">
+    <button class="btn btn-success btn-lg" onclick="generatePDF()">📄 Download PDF Quote</button>
     <button class="btn btn-outline" onclick="window.print()">🖨️ Print</button>
   </div>
 </div>
 
 </div><!-- /container -->
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 <script>
@@ -651,111 +728,56 @@ const NIF_CATARACT = {
 };
 
 // =============================================================================
-// LOOKUP FUNCTIONS
-// =============================================================================
-
-function getYBAgeBandIdx(age) {
-  if (age <= 17) return 0;
-  if (age <= 30) return 1;
-  if (age <= 35) return 2;
-  if (age <= 40) return 3;
-  if (age <= 45) return 4;
-  if (age <= 50) return 5;
-  if (age <= 55) return 6;
-  if (age <= 60) return 7;
-  if (age <= 65) return 8;
-  return 9;
-}
-
-function getYBPremium(plan, zone, mode, siIdx, age) {
-  const band = getYBAgeBandIdx(age);
-  const tbl = YB[plan][zone][mode];
-  if (tbl) return tbl[siIdx][band];
-  // Zone2 Basic HY/Qtr/Monthly: derive from z1 × 0.8182
-  const z1val = YB[plan].z1[mode][siIdx][band];
-  return Math.round(z1val * 0.8182);
-}
-
-function getNIFCataractBandIdx(age) {
-  if (age < 50) return 0;
-  if (age <= 55) return 1;
-  if (age <= 60) return 2;
-  if (age <= 65) return 3;
-  return 4;
-}
-
-function getNIFPremium(zone, siIdx, age) {
-  const idx = Math.min(age, 100);
-  return zone === 'z1' ? NIF_Z1[idx][siIdx] : NIF_Z2[idx][siIdx];
-}
-
-// =============================================================================
 // STATE
 // =============================================================================
-
 let members = [];
 let quoteResult = null;
 
 // =============================================================================
 // UI SETUP
 // =============================================================================
-
 function init() {
-  addMember();
-  addMember();
-  onProductChange();
-  updateProductDesc();
-  updateZoneDesc();
+  addMember(); addMember();
+  onProductChange(); updateProductDesc(); updateZoneDesc();
 }
 
 function onProductChange() {
   const p = getProduct();
   document.getElementById('ybOptions').classList.toggle('hidden', p !== 'yb');
   document.getElementById('nifOptions').classList.toggle('hidden', p !== 'nif');
-  updateProductDesc();
-  updateZoneDesc();
-  renderMembers();
+  updateProductDesc(); updateZoneDesc(); renderMembers();
 }
 
-function getProduct() {
-  return document.querySelector('input[name=product]:checked').value;
-}
+function getProduct() { return document.querySelector('input[name=product]:checked').value; }
 
 function updateProductDesc() {
   const p = getProduct();
   const el = document.getElementById('productDesc');
-  if (p === 'yb') {
-    el.innerHTML = '<span class="info-badge">Yuva Bharat</span> Individual &amp; Floater coverage · Basic / Gold / Platinum plans · SI ₹5L–₹1Cr · Annual/Half-Yearly/Quarterly/Monthly · UIN: NIAHLIP25059V042425';
-  } else {
-    el.innerHTML = '<span class="info-badge">NI Floater Mediclaim</span> Floater only · SI ₹2L–₹15L · Annual premium · Per-year age pricing · UIN: NIAHLIP25039V092425';
-  }
+  if (p === 'yb') el.innerHTML = '<span class="info-pill">Yuva Bharat</span> &nbsp;Individual &amp; Floater · Basic / Gold / Platinum · SI ₹5L–₹1Cr · Annual / Half-Yearly / Quarterly / Monthly · UIN: NIAHLIP25059V042425';
+  else el.innerHTML = '<span class="info-pill">NI Floater</span> &nbsp;Floater only · SI ₹2L–₹15L · Annual premium · Per-year age pricing · UIN: NIAHLIP25039V092425';
 }
 
-function onZoneChange() {
-  updateZoneDesc();
-  renderMembers();
-}
+function onZoneChange() { updateZoneDesc(); renderMembers(); }
 
 function updateZoneDesc() {
   const z = document.getElementById('zone').value;
   const p = getProduct();
   const el = document.getElementById('zoneDesc');
   if (p === 'yb') {
-    if (z === 'z1') el.innerHTML = '<strong>Zone 1:</strong> Delhi/NCR, Mumbai, Mumbai Suburban, Thane, Navi Mumbai, Surat, Ahmedabad, Vadodara';
-    else el.innerHTML = '<strong>Zone 2:</strong> Rest of India';
+    el.innerHTML = z === 'z1'
+      ? '📍 <strong>Zone 1:</strong> Delhi/NCR · Mumbai · Mumbai Suburban · Thane · Navi Mumbai · Surat · Ahmedabad · Vadodara'
+      : '📍 <strong>Zone 2:</strong> Rest of India';
   } else {
-    if (z === 'z1') el.innerHTML = '<strong>Zone 1:</strong> Maharashtra and Gujarat';
-    else el.innerHTML = '<strong>Zone 2:</strong> Rest of India (20% co-payment if treated in Zone 1 hospital)';
+    el.innerHTML = z === 'z1'
+      ? '📍 <strong>Zone 1:</strong> Maharashtra and Gujarat'
+      : '📍 <strong>Zone 2:</strong> Rest of India &nbsp;<span style="color:#d97706;font-weight:700">(20% co-pay if treated in Zone 1)</span>';
   }
 }
 
 function onYBPlanChange() {
   const plan = document.getElementById('ybPlan').value;
   document.getElementById('ybMaternitySection').classList.toggle('hidden', plan !== 'Platinum');
-  if (plan !== 'Platinum') {
-    document.getElementById('ybMaternity').checked = false;
-    document.getElementById('ybMaternityLimit').classList.add('hidden');
-  }
+  if (plan !== 'Platinum') { document.getElementById('ybMaternity').checked = false; document.getElementById('ybMaternityLimit').classList.add('hidden'); }
 }
 
 function onYBMaternityChange() {
@@ -771,26 +793,18 @@ function onNIFSIChange() {
 // =============================================================================
 // MEMBER MANAGEMENT
 // =============================================================================
-
 function addMember() {
-  const id = Date.now();
-  members.push({id, age: '', name: `Member ${members.length+1}`, bmi: 'normal', hba1c: 'normal', bp: 'normal', noHosp: false});
+  const id = Date.now() + Math.random();
+  members.push({id, age:'', name:`Member ${members.length+1}`, bmi:'normal', hba1c:'normal', bp:'normal', noHosp:false});
   renderMembers();
 }
 
-function removeMember(id) {
-  members = members.filter(m => m.id !== id);
-  renderMembers();
-}
-
-function getMemberVal(id, field) {
-  return document.getElementById(`m_${id}_${field}`)?.value ?? '';
-}
+function removeMember(id) { members = members.filter(m => m.id !== id); renderMembers(); }
 
 function collectMembers() {
   return members.map(m => ({
     id: m.id,
-    name: document.getElementById(`m_${m.id}_name`)?.value || `Member`,
+    name: document.getElementById(`m_${m.id}_name`)?.value || 'Member',
     age: parseInt(document.getElementById(`m_${m.id}_age`)?.value) || 0,
     bmi: document.getElementById(`m_${m.id}_bmi`)?.value || 'normal',
     hba1c: document.getElementById(`m_${m.id}_hba1c`)?.value || 'normal',
@@ -801,49 +815,48 @@ function collectMembers() {
 
 function renderMembers() {
   const p = getProduct();
-  const container = document.getElementById('membersContainer');
-  if (!members.length) { container.innerHTML = '<p style="color:#999;font-size:13px">No members added.</p>'; return; }
-  container.innerHTML = members.map((m, i) => {
-    const showHealth = p === 'yb'; // health params only for YB
+  const c = document.getElementById('membersContainer');
+  if (!members.length) { c.innerHTML = '<p style="color:var(--muted);font-size:13px;padding:10px 0">No members. Click "+ Add Member".</p>'; return; }
+  c.innerHTML = members.map((m, i) => {
+    const showHP = p === 'yb';
     return `<div class="member-block">
       <div class="member-header">
-        <h3>Member ${i+1}</h3>
-        ${members.length > 1 ? `<button class="btn btn-danger" style="padding:4px 10px;font-size:12px" onclick="removeMember(${m.id})">Remove</button>` : ''}
+        <div class="member-label"><div class="member-num">${i+1}</div>${m.name||'Member '+(i+1)}</div>
+        ${members.length>1 ? `<button class="btn btn-danger btn-sm" onclick="removeMember(${m.id})">✕ Remove</button>` : ''}
       </div>
-      <div class="form-row">
-        <div class="form-group"><label>Name / Relation</label><input type="text" id="m_${m.id}_name" value="${m.name}" placeholder="e.g. Self, Spouse"></div>
-        <div class="form-group"><label>Age (years)</label><input type="number" id="m_${m.id}_age" value="${m.age||''}" min="0" max="120" placeholder="Age"></div>
+      <div class="form-grid">
+        <div class="form-group"><span class="form-label">Name / Relation</span><input type="text" id="m_${m.id}_name" value="${m.name||''}" placeholder="e.g. Self, Spouse, Son"></div>
+        <div class="form-group"><span class="form-label">Age (years)</span><input type="number" id="m_${m.id}_age" value="${m.age||''}" min="0" max="120" placeholder="Age in years"></div>
       </div>
-      ${showHealth ? `<div style="font-size:12px;font-weight:600;color:#4a5568;margin-bottom:6px">Health Parameters (for members ≥18 yrs – affects discount/loading)</div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>BMI</label>
-          <select id="m_${m.id}_bmi">
-            <option value="good" ${m.bmi==='good'?'selected':''}>18.5–32 (−2.5%)</option>
-            <option value="normal" ${m.bmi==='normal'?'selected':''}>Not specified (0%)</option>
-            <option value="high" ${m.bmi==='high'?'selected':''}>Above 32 (+2.5%)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>HbA1c (Diabetes)</label>
-          <select id="m_${m.id}_hba1c">
-            <option value="good" ${m.hba1c==='good'?'selected':''}>Non-diabetic &lt;6.4 (−2.5%)</option>
-            <option value="normal" ${m.hba1c==='normal'?'selected':''}>Not specified (0%)</option>
-            <option value="high" ${m.hba1c==='high'?'selected':''}>Diabetic &gt;6.4 (+2.5%)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Blood Pressure</label>
-          <select id="m_${m.id}_bp">
-            <option value="good" ${m.bp==='good'?'selected':''}>≤120/80 (−2.5%)</option>
-            <option value="normal" ${m.bp==='normal'?'selected':''}>120–139/89 (0%)</option>
-            <option value="high" ${m.bp==='high'?'selected':''}>Above 139/89 (+2.5%)</option>
-          </select>
-        </div>
-        <div class="form-group" style="justify-content:center;padding-top:18px">
-          <label style="flex-direction:row;align-items:center;gap:6px;cursor:pointer">
-            <input type="checkbox" id="m_${m.id}_nohosp" ${m.noHosp?'checked':''}> No hospitalisation last 3 yrs (−2.5%)
-          </label>
+      ${showHP ? `<div style="background:rgba(37,99,168,.06);border-radius:8px;padding:10px 12px;margin-top:4px">
+        <div style="font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Health Parameters (18+ only · affects discount / loading)</div>
+        <div class="form-grid" style="grid-template-columns:repeat(auto-fit,minmax(165px,1fr))">
+          <div class="form-group"><span class="form-label">BMI</span>
+            <select id="m_${m.id}_bmi">
+              <option value="good">18.5–32 &nbsp;(−2.5%)</option>
+              <option value="normal" selected>Not specified (0%)</option>
+              <option value="high">Above 32 &nbsp;(+2.5%)</option>
+            </select>
+          </div>
+          <div class="form-group"><span class="form-label">HbA1c / Diabetes</span>
+            <select id="m_${m.id}_hba1c">
+              <option value="good">Non-diabetic &lt;6.4 (−2.5%)</option>
+              <option value="normal" selected>Not specified (0%)</option>
+              <option value="high">Diabetic &gt;6.4 (+2.5%)</option>
+            </select>
+          </div>
+          <div class="form-group"><span class="form-label">Blood Pressure</span>
+            <select id="m_${m.id}_bp">
+              <option value="good">≤120/80 &nbsp;(−2.5%)</option>
+              <option value="normal" selected>120–139/89 (0%)</option>
+              <option value="high">Above 139/89 (+2.5%)</option>
+            </select>
+          </div>
+          <div class="form-group" style="justify-content:flex-end">
+            <label class="choice-pill" style="margin-top:18px;font-size:12px">
+              <input type="checkbox" id="m_${m.id}_nohosp"> No hosp. last 3 yrs (−2.5%)
+            </label>
+          </div>
         </div>
       </div>` : ''}
     </div>`;
@@ -853,24 +866,17 @@ function renderMembers() {
 // =============================================================================
 // CALCULATION
 // =============================================================================
-
 function fmt(n) { return '₹' + Math.round(n).toLocaleString('en-IN'); }
 
 function calculate() {
   const mems = collectMembers();
   if (!mems.length) { alert('Please add at least one member.'); return; }
-  for (const m of mems) {
-    if (!m.age || m.age < 0 || m.age > 120) { alert(`Please enter a valid age for ${m.name}.`); return; }
-  }
-
+  for (const m of mems) if (!m.age || m.age < 0 || m.age > 120) { alert(`Enter valid age for ${m.name}.`); return; }
   const p = getProduct();
-  if (p === 'yb') calculateYB(mems);
-  else calculateNIF(mems);
-
+  if (p === 'yb') calculateYB(mems); else calculateNIF(mems);
   document.getElementById('resultsSection').classList.remove('hidden');
-  // refresh commission if it's already visible
   if (document.getElementById('showCommission').checked) renderCommission();
-  document.getElementById('resultsSection').scrollIntoView({behavior:'smooth', block:'start'});
+  document.getElementById('resultsSection').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function calculateYB(mems) {
@@ -882,76 +888,66 @@ function calculateYB(mems) {
   const zone = document.getElementById('zone').value;
   const loyalty = document.getElementById('ybLoyalty').checked;
   const maternity = document.getElementById('ybMaternity')?.checked && plan === 'Platinum';
-  const matLimitIdx = maternity ? parseInt(document.getElementById('ybMaternityLimitVal')?.value || 0) : -1;
-
-  const modeLabel = {annual:'Annual', hy:'Half-Yearly', quarterly:'Quarterly', monthly:'Monthly'}[mode];
-  const termDisc = term === 2 ? 0.05 : term === 3 ? 0.07 : 0;
-  const floaterDisc = coverage === 'floater' ? (mems.length >= 4 ? 0.15 : mems.length === 3 ? 0.10 : mems.length === 2 ? 0.05 : 0) : 0;
+  const matLimitIdx = maternity ? parseInt(document.getElementById('ybMaternityLimitVal')?.value||0) : -1;
+  const modeLabel = {annual:'Annual',hy:'Half-Yearly',quarterly:'Quarterly',monthly:'Monthly'}[mode];
+  const termDisc = term===2?0.05:term===3?0.07:0;
+  const floaterDisc = coverage==='floater'?(mems.length>=4?0.15:mems.length===3?0.10:mems.length===2?0.05:0):0;
 
   const memberRows = mems.map(m => {
     const base = getYBPremium(plan, zone, mode, siIdx, m.age);
     let hpNet = 0;
     if (m.age >= 18) {
-      if (m.bmi === 'good') hpNet -= 2.5;
-      if (m.bmi === 'high') hpNet += 2.5;
-      if (m.hba1c === 'good') hpNet -= 2.5;
-      if (m.hba1c === 'high') hpNet += 2.5;
-      if (m.bp === 'good') hpNet -= 2.5;
-      if (m.bp === 'high') hpNet += 2.5;
-      if (m.noHosp) hpNet -= 2.5;
+      if (m.bmi==='good') hpNet-=2.5; if (m.bmi==='high') hpNet+=2.5;
+      if (m.hba1c==='good') hpNet-=2.5; if (m.hba1c==='high') hpNet+=2.5;
+      if (m.bp==='good') hpNet-=2.5; if (m.bp==='high') hpNet+=2.5;
+      if (m.noHosp) hpNet-=2.5;
     }
-    const afterHP = base * (1 + hpNet / 100);
-    return {name: m.name, age: m.age, base, hpNet, afterHP};
+    return {name:m.name, age:m.age, base, hpNet, afterHP:base*(1+hpNet/100)};
   });
 
-  const subtotal = memberRows.reduce((s, r) => s + r.afterHP, 0);
-  const afterFloater = subtotal * (1 - floaterDisc);
-  const afterLoyalty = afterFloater * (1 - (loyalty ? 0.025 : 0));
-  const afterTerm = afterLoyalty * (1 - termDisc);
-
-  // Maternity optional
-  const matKeys = ['50K','75K','1L'];
-  const matLabels = ['₹50,000','₹75,000','₹1,00,000'];
-  let matPrem = 0;
-  if (maternity) {
-    matPrem = YB_MATERNITY[zone][matKeys[matLimitIdx]][mode] || 0;
-  }
-
+  const subtotal = memberRows.reduce((s,r)=>s+r.afterHP,0);
+  const afterFloater = subtotal*(1-floaterDisc);
+  const afterLoyalty = afterFloater*(1-(loyalty?0.025:0));
+  const afterTerm = afterLoyalty*(1-termDisc);
+  const matKeys=['50K','75K','1L'], matLabels=['₹50,000','₹75,000','₹1,00,000'];
+  const matPrem = maternity ? (YB_MATERNITY[zone][matKeys[matLimitIdx]][mode]||0) : 0;
   const grandTotal = afterTerm + matPrem;
-  const perInstalment = grandTotal; // per payment instalment
-  const annualEquivalent = mode === 'annual' ? grandTotal :
-    mode === 'hy' ? grandTotal * 2 : mode === 'quarterly' ? grandTotal * 4 : grandTotal * 12;
 
   quoteResult = {
-    product: 'Yuva Bharat Health Policy',
-    plan, zone, siIdx, coverage, mode: modeLabel, term,
-    siLabel: YB_SI_LABELS[siIdx],
-    zoneLabel: zone === 'z1' ? 'Zone 1' : 'Zone 2',
+    product:'Yuva Bharat Health Policy', plan, zone, siIdx, coverage,
+    mode:modeLabel, term, siLabel:YB_SI_LABELS[siIdx],
+    zoneLabel:zone==='z1'?'Zone 1':'Zone 2',
     memberRows, subtotal, floaterDisc, afterFloater, loyalty, afterLoyalty,
-    termDisc, afterTerm, maternity, matLabel: maternity ? matLabels[matLimitIdx] : '',
-    matPrem, grandTotal, annualEquivalent, mems
+    termDisc, afterTerm, maternity, matLabel:maternity?matLabels[matLimitIdx]:'',
+    matPrem, grandTotal, mems
   };
 
-  // Render
-  const head = document.getElementById('quoteTableHead');
-  const body = document.getElementById('quoteTableBody');
-  head.innerHTML = '<th>Member</th><th>Age</th><th>Base Premium</th><th>HP Adj.</th><th>Member Premium</th>';
-  body.innerHTML = memberRows.map(r => `
-    <tr>
-      <td>${r.name}</td><td>${r.age}</td><td>${fmt(r.base)}</td>
-      <td style="color:${r.hpNet<0?'#86efac':r.hpNet>0?'#fca5a5':'inherit'}">${r.hpNet !== 0 ? (r.hpNet > 0 ? '+' : '') + r.hpNet + '%' : '—'}</td>
-      <td>${fmt(r.afterHP)}</td>
-    </tr>`).join('') +
-    `<tr style="border-top:1px solid rgba(255,255,255,.25)"><td colspan="4"><b>Sub-total</b></td><td><b>${fmt(subtotal)}</b></td></tr>` +
-    (floaterDisc ? `<tr class="discount-row"><td colspan="4">Floater Discount (${mems.length} members, −${floaterDisc*100}%)</td><td>−${fmt(subtotal*floaterDisc)}</td></tr>` : '') +
-    (loyalty ? `<tr class="discount-row"><td colspan="4">Loyalty Discount −2.5%</td><td>−${fmt(afterFloater*0.025)}</td></tr>` : '') +
-    (termDisc ? `<tr class="discount-row"><td colspan="4">Long-Term Discount (${term} yrs, −${termDisc*100}%)</td><td>−${fmt(afterLoyalty*termDisc)}</td></tr>` : '') +
-    (maternity ? `<tr><td colspan="4">Optional: Enhanced Maternity (${matLabels[matLimitIdx]})</td><td>${fmt(matPrem)}</td></tr>` : '') +
-    `<tr class="total-row"><td colspan="4">TOTAL ${modeLabel.toUpperCase()} PREMIUM</td><td>${fmt(grandTotal)}</td></tr>` +
-    (mode !== 'annual' ? `<tr><td colspan="4" style="font-size:12px;opacity:.7">Annual equivalent</td><td style="font-size:12px;opacity:.7">${fmt(annualEquivalent)}</td></tr>` : '');
+  // Render meta
+  const el = document.getElementById('quoteHeader');
+  el.innerHTML = [
+    `<span>${plan} Plan</span>`,
+    `<span>${quoteResult.zoneLabel}</span>`,
+    `<span>SI: ${YB_SI_LABELS[siIdx]}</span>`,
+    `<span>${coverage==='floater'?'Family Floater':'Individual'}</span>`,
+    `<span>${modeLabel}</span>`,
+    `<span>Term: ${term} Yr${term>1?'s':''}</span>`,
+    `<span>GST: Nil</span>`
+  ].join(' ');
 
-  document.getElementById('quoteHeader').innerHTML =
-    `<b>Product:</b> Yuva Bharat Health Policy &nbsp;|&nbsp; <b>Plan:</b> ${plan} &nbsp;|&nbsp; <b>Zone:</b> ${quoteResult.zoneLabel} &nbsp;|&nbsp; <b>SI:</b> ${YB_SI_LABELS[siIdx]} &nbsp;|&nbsp; <b>Coverage:</b> ${coverage==='floater'?'Family Floater':'Individual'} &nbsp;|&nbsp; <b>Mode:</b> ${modeLabel} &nbsp;|&nbsp; <b>Term:</b> ${term} Year${term>1?'s':''} &nbsp;|&nbsp; <b>GST:</b> Nil`;
+  // Table
+  const cols = 5;
+  document.getElementById('quoteTableHead').innerHTML = '<th>Member</th><th>Age</th><th>Base Premium</th><th>HP Adj.</th><th>Premium</th>';
+  document.getElementById('quoteTableBody').innerHTML =
+    memberRows.map(r => `<tr>
+      <td>${r.name}</td><td>${r.age}</td><td>${fmt(r.base)}</td>
+      <td style="color:${r.hpNet<0?'#6ee7b7':r.hpNet>0?'#fca5a5':'rgba(255,255,255,.5)'}">${r.hpNet?((r.hpNet>0?'+':'')+r.hpNet+'%'):'—'}</td>
+      <td>${fmt(r.afterHP)}</td></tr>`).join('')
+    + `<tr class="rt-sub"><td colspan="4">Sub-total</td><td>${fmt(subtotal)}</td></tr>`
+    + (floaterDisc?`<tr class="rt-disc"><td colspan="4">Floater Discount (${mems.length} members, −${floaterDisc*100}%)</td><td>−${fmt(subtotal*floaterDisc)}</td></tr>`:'')
+    + (loyalty?`<tr class="rt-disc"><td colspan="4">Loyalty Discount −2.5%</td><td>−${fmt(afterFloater*0.025)}</td></tr>`:'')
+    + (termDisc?`<tr class="rt-disc"><td colspan="4">Long-Term Discount (${term} yrs, −${termDisc*100}%)</td><td>−${fmt(afterLoyalty*termDisc)}</td></tr>`:'')
+    + (maternity?`<tr><td colspan="4">Optional: Enhanced Maternity (${matLabels[matLimitIdx]})</td><td>${fmt(matPrem)}</td></tr>`:'')
+    + `<tr class="rt-total"><td colspan="4">TOTAL ${modeLabel.toUpperCase()} PREMIUM</td><td>${fmt(grandTotal)}</td></tr>`;
 
   document.getElementById('quoteNotes').innerHTML = '';
 }
@@ -961,249 +957,304 @@ function calculateNIF(mems) {
   const term = parseInt(document.getElementById('nifTerm').value);
   const zone = document.getElementById('zone').value;
   const cataract = document.getElementById('nifCataract')?.checked && siIdx >= 3;
-  const termDisc = term === 2 ? 0.05 : term === 3 ? 0.07 : 0;
-  const floaterDisc = mems.length >= 4 ? 0.15 : mems.length === 3 ? 0.10 : mems.length === 2 ? 0.05 : 0;
+  const termDisc = term===2?0.05:term===3?0.07:0;
+  const floaterDisc = mems.length>=4?0.15:mems.length===3?0.10:mems.length===2?0.05:0;
 
   const memberRows = mems.map(m => {
     const base = getNIFPremium(zone, siIdx, m.age);
-    let catPrem = 0;
-    if (cataract) {
-      catPrem = (NIF_CATARACT[siIdx] || [])[getNIFCataractBandIdx(m.age)] || 0;
-    }
-    return {name: m.name, age: m.age, base, catPrem};
+    const catPrem = cataract ? ((NIF_CATARACT[siIdx]||[])[getNIFCataractBandIdx(m.age)]||0) : 0;
+    return {name:m.name, age:m.age, base, catPrem};
   });
 
-  const subtotal = memberRows.reduce((s, r) => s + r.base, 0);
-  const catTotal = memberRows.reduce((s, r) => s + r.catPrem, 0);
+  const subtotal = memberRows.reduce((s,r)=>s+r.base,0);
+  const catTotal = memberRows.reduce((s,r)=>s+r.catPrem,0);
   const combined = subtotal + catTotal;
-  const afterFloater = combined * (1 - floaterDisc);
-  const afterTerm = afterFloater * (1 - termDisc);
+  const afterFloater = combined*(1-floaterDisc);
+  const afterTerm = afterFloater*(1-termDisc);
 
   quoteResult = {
-    product: 'New India Floater Mediclaim Policy',
-    zone, siIdx, term, siLabel: NIF_SI_LABELS[siIdx],
-    zoneLabel: zone === 'z1' ? 'Zone 1 (Maharashtra & Gujarat)' : 'Zone 2 (Rest of India)',
+    product:'New India Floater Mediclaim Policy',
+    zone, siIdx, term, siLabel:NIF_SI_LABELS[siIdx],
+    zoneLabel:zone==='z1'?'Zone 1 (Maharashtra & Gujarat)':'Zone 2 (Rest of India)',
     memberRows, subtotal, catTotal, combined, floaterDisc, afterFloater,
-    termDisc, afterTerm, cataract, mems
+    termDisc, afterTerm:Math.round(afterTerm), cataract, mems
   };
 
-  const head = document.getElementById('quoteTableHead');
-  const body = document.getElementById('quoteTableBody');
-  head.innerHTML = cataract ?
-    '<th>Member</th><th>Age</th><th>Base Premium</th><th>Cataract Cover</th><th>Member Total</th>' :
-    '<th>Member</th><th>Age</th><th>Base Premium</th>';
-  body.innerHTML = memberRows.map(r => cataract ?
-    `<tr><td>${r.name}</td><td>${r.age}</td><td>${fmt(r.base)}</td><td>${fmt(r.catPrem)}</td><td>${fmt(r.base+r.catPrem)}</td></tr>` :
-    `<tr><td>${r.name}</td><td>${r.age}</td><td>${fmt(r.base)}</td></tr>`
-  ).join('') +
-  `<tr style="border-top:1px solid rgba(255,255,255,.25)"><td colspan="${cataract?4:2}"><b>Sub-total</b></td><td><b>${fmt(combined)}</b></td></tr>` +
-  (floaterDisc ? `<tr class="discount-row"><td colspan="${cataract?4:2}">Floater Discount (${mems.length} members, −${floaterDisc*100}%)</td><td>−${fmt(combined*floaterDisc)}</td></tr>` : '') +
-  (termDisc ? `<tr class="discount-row"><td colspan="${cataract?4:2}">Long-Term Discount (${term} yrs, −${termDisc*100}%)</td><td>−${fmt(afterFloater*termDisc)}</td></tr>` : '') +
-  `<tr class="total-row"><td colspan="${cataract?4:2}">TOTAL ANNUAL PREMIUM</td><td>${fmt(afterTerm)}</td></tr>`;
+  const el = document.getElementById('quoteHeader');
+  el.innerHTML = [
+    `<span>${quoteResult.zoneLabel}</span>`,
+    `<span>SI: ${NIF_SI_LABELS[siIdx]}</span>`,
+    `<span>Family Floater</span>`,
+    `<span>Annual</span>`,
+    `<span>Term: ${term} Yr${term>1?'s':''}</span>`,
+    `<span>GST: Nil</span>`,
+    zone==='z2'?`<span style="background:rgba(239,68,68,.2);color:#fca5a5">20% Co-pay if treated in Zone 1</span>`:''
+  ].join(' ');
 
-  document.getElementById('quoteHeader').innerHTML =
-    `<b>Product:</b> NI Floater Mediclaim Policy &nbsp;|&nbsp; <b>Zone:</b> ${quoteResult.zoneLabel} &nbsp;|&nbsp; <b>SI:</b> ${NIF_SI_LABELS[siIdx]} &nbsp;|&nbsp; <b>Coverage:</b> Family Floater &nbsp;|&nbsp; <b>Mode:</b> Annual &nbsp;|&nbsp; <b>Term:</b> ${term} Year${term>1?'s':''} &nbsp;|&nbsp; <b>GST:</b> Nil`;
+  const hasCat = cataract;
+  const cols = hasCat ? 5 : 3;
+  document.getElementById('quoteTableHead').innerHTML = hasCat
+    ? '<th>Member</th><th>Age</th><th>Base Premium</th><th>Cataract Cover</th><th>Member Total</th>'
+    : '<th>Member</th><th>Age</th><th>Base Premium</th>';
+  document.getElementById('quoteTableBody').innerHTML =
+    memberRows.map(r => hasCat
+      ? `<tr><td>${r.name}</td><td>${r.age}</td><td>${fmt(r.base)}</td><td>${fmt(r.catPrem)}</td><td>${fmt(r.base+r.catPrem)}</td></tr>`
+      : `<tr><td>${r.name}</td><td>${r.age}</td><td>${fmt(r.base)}</td></tr>`).join('')
+    + `<tr class="rt-sub"><td colspan="${cols-1}">Sub-total</td><td>${fmt(combined)}</td></tr>`
+    + (floaterDisc?`<tr class="rt-disc"><td colspan="${cols-1}">Floater Discount (${mems.length} members, −${floaterDisc*100}%)</td><td>−${fmt(combined*floaterDisc)}</td></tr>`:'')
+    + (termDisc?`<tr class="rt-disc"><td colspan="${cols-1}">Long-Term Discount (${term} yrs, −${termDisc*100}%)</td><td>−${fmt(afterFloater*termDisc)}</td></tr>`:'')
+    + `<tr class="rt-total"><td colspan="${cols-1}">TOTAL ANNUAL PREMIUM</td><td>${fmt(afterTerm)}</td></tr>`;
 
   document.getElementById('quoteNotes').innerHTML = '';
 }
 
 function resetForm() {
-  members = [];
-  addMember();
-  addMember();
+  members = []; addMember(); addMember();
   document.getElementById('resultsSection').classList.add('hidden');
   quoteResult = null;
-  window.scrollTo({top:0, behavior:'smooth'});
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// =============================================================================
+// COMMISSION
+// =============================================================================
+function getCommissionRates(oldestAge) {
+  if (oldestAge < 40) return {commPct:15,incPct:25,totalPct:40,band:'Below 40 years'};
+  if (oldestAge < 55) return {commPct:15,incPct:12,totalPct:27,band:'40 to <55 years'};
+  return {commPct:15,incPct:0,totalPct:15,band:'55 years & above'};
+}
+
+function toggleCommission() {
+  const cb = document.getElementById('showCommission');
+  cb.checked = !cb.checked;
+  const on = cb.checked;
+  document.getElementById('toggleViz').classList.toggle('on', on);
+  document.getElementById('toggleLabel').textContent = on ? 'Hide' : 'Show';
+  document.getElementById('commissionBody').classList.toggle('hidden', !on);
+  if (on && quoteResult) renderCommission();
+}
+
+function renderCommission() {
+  if (!quoteResult) return;
+  const mems = quoteResult.mems;
+  const oldestAge = Math.max(...mems.map(m => m.age||0));
+  const totalPremium = quoteResult.grandTotal ?? quoteResult.afterTerm;
+  const rates = getCommissionRates(oldestAge);
+  const commission = Math.round(totalPremium * rates.commPct / 100);
+  const incentive  = Math.round(totalPremium * rates.incPct  / 100);
+  const totalAward = Math.round(totalPremium * rates.totalPct / 100);
+
+  document.getElementById('commOldestAge').textContent = oldestAge + ' yrs';
+  document.getElementById('commBand').textContent = rates.band;
+  document.getElementById('sc1').textContent = fmt(commission);
+  document.getElementById('sc2').textContent = fmt(incentive);
+  document.getElementById('sc3').textContent = fmt(totalAward);
+  document.getElementById('sb1').textContent = rates.commPct + '%';
+  document.getElementById('sb2').textContent = rates.incPct + '%';
+  document.getElementById('sb3').textContent = rates.totalPct + '%';
+  document.getElementById('scBase').textContent = fmt(totalPremium);
 }
 
 // =============================================================================
 // PDF GENERATION
 // =============================================================================
-
 function generatePDF() {
   if (!quoteResult) { alert('Please calculate premium first.'); return; }
-  if (typeof window.jspdf === 'undefined') { alert('PDF library not loaded. Please check your internet connection.'); return; }
-
+  if (typeof window.jspdf === 'undefined') { alert('PDF library not loaded. Check internet connection.'); return; }
   const {jsPDF} = window.jspdf;
-  const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
-  const agent = document.getElementById('agentName').value || 'Insurance Agent';
+  const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W = 210, M = 14;
+  const agent = document.getElementById('agentName').value || 'Agent';
   const agentCode = document.getElementById('agentCode').value;
-  const custName = document.getElementById('custName').value || 'Prospective Customer';
+  const custName = document.getElementById('custName').value || 'Customer';
   const custContact = document.getElementById('custContact').value;
-  const today = new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'});
+  const today = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
   const qr = quoteResult;
 
-  // Header
-  doc.setFillColor(26, 46, 74);
-  doc.rect(0, 0, 210, 32, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(16); doc.setFont('helvetica','bold');
-  doc.text('INSURANCE PREMIUM QUOTATION', 105, 13, {align:'center'});
-  doc.setFontSize(10); doc.setFont('helvetica','normal');
-  doc.text('New India Assurance Co. Ltd.', 105, 20, {align:'center'});
-  doc.text(`GST: Nil w.e.f. 22 Sept 2025`, 105, 26, {align:'center'});
+  // ── HEADER BAND ──
+  doc.setFillColor(15,34,64);
+  doc.rect(0,0,W,28,'F');
+  // accent stripe
+  doc.setFillColor(37,99,168);
+  doc.rect(0,25,W,3,'F');
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold'); doc.setFontSize(15);
+  doc.text('UP38- संभल', M, 11);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9);
+  doc.setTextColor(150,180,220);
+  doc.text('स्वास्थ्य बीमा प्रीमियम कैलकुलेटर  |  Health Insurance Premium Quotation', M, 18);
+  doc.setTextColor(255,215,0); doc.setFontSize(8);
+  doc.text('GST: Nil  ·  Fresh Business', W-M, 18, {align:'right'});
+  doc.setTextColor(255,255,255); doc.setFontSize(8);
+  doc.text(`Date: ${today}`, W-M, 11, {align:'right'});
 
-  // Agent & Customer info
-  doc.setTextColor(30, 30, 30);
-  doc.setFontSize(9);
-  let y = 38;
-  doc.setFont('helvetica','bold'); doc.text('Agent Details:', 14, y);
-  doc.setFont('helvetica','normal');
-  doc.text(`${agent}${agentCode ? '  |  Code: '+agentCode : ''}`, 50, y);
-  y += 6;
-  doc.setFont('helvetica','bold'); doc.text('Customer:', 14, y);
-  doc.setFont('helvetica','normal');
-  doc.text(`${custName}${custContact ? '  |  '+custContact : ''}`, 50, y);
-  y += 6;
-  doc.setFont('helvetica','bold'); doc.text('Date:', 14, y);
-  doc.setFont('helvetica','normal'); doc.text(today, 50, y);
+  let y = 36;
 
-  // Product summary box
-  y += 10;
-  doc.setFillColor(240, 246, 255);
-  doc.rect(14, y, 182, 28, 'F');
-  doc.setDrawColor(37, 99, 168); doc.rect(14, y, 182, 28);
-  doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(26, 46, 74);
-  doc.text(qr.product, 105, y+7, {align:'center'});
-  doc.setFontSize(8.5); doc.setFont('helvetica','normal'); doc.setTextColor(50,50,50);
-  const info1 = qr.plan ? `Plan: ${qr.plan}   |   ` : '';
-  const info2 = `Zone: ${qr.zoneLabel}   |   SI: ${qr.siLabel}`;
-  const info3 = qr.mode ? `   |   Mode: ${qr.mode}   |   Term: ${qr.term} Year${qr.term>1?'s':''}` : `   |   Term: ${qr.term} Year${qr.term>1?'s':''}`;
-  doc.text(info1 + info2 + info3, 105, y+14, {align:'center'});
-  if (qr.coverage) {
-    doc.text(`Coverage: ${qr.coverage==='floater'?'Family Floater':'Individual'}`, 105, y+21, {align:'center'});
-  } else {
-    doc.text('Coverage: Family Floater (NI Floater Mediclaim)', 105, y+21, {align:'center'});
-  }
+  // ── INFO BOX ──
+  doc.setFillColor(245,248,255);
+  doc.setDrawColor(200,215,240);
+  doc.roundedRect(M, y, W-2*M, 28, 3, 3, 'FD');
 
-  // Member table
+  // Left: agent
+  doc.setTextColor(100,116,139); doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.text('AGENT', M+4, y+7);
+  doc.setTextColor(15,34,64); doc.setFontSize(10); doc.setFont('helvetica','bold');
+  doc.text(agent + (agentCode ? `  [${agentCode}]` : ''), M+4, y+14);
+
+  // Middle: customer
+  doc.setTextColor(100,116,139); doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.text('CUSTOMER', W/2-10, y+7);
+  doc.setTextColor(15,34,64); doc.setFontSize(10); doc.setFont('helvetica','bold');
+  doc.text(custName, W/2-10, y+14);
+  if (custContact) { doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(100,116,139); doc.text(custContact, W/2-10, y+20); }
+
+  // Right: quote ref
+  doc.setTextColor(100,116,139); doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.text('QUOTE DATE', W-M-4, y+7, {align:'right'});
+  doc.setTextColor(15,34,64); doc.setFontSize(10); doc.setFont('helvetica','bold');
+  doc.text(today, W-M-4, y+14, {align:'right'});
+
   y += 34;
-  doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(26,46,74);
-  doc.text('Member-wise Premium Breakdown', 14, y);
+
+  // ── PRODUCT STRIP ──
+  doc.setFillColor(37,99,168);
+  doc.roundedRect(M, y, W-2*M, 16, 3, 3, 'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(9.5);
+  doc.text(qr.product, M+6, y+7);
+  // right-side pills
+  const pillTexts = [qr.siLabel, qr.zoneLabel, qr.mode||'Annual', `Term: ${qr.term} yr${qr.term>1?'s':''}`].filter(Boolean);
+  let px = W-M-4;
+  doc.setFont('helvetica','normal'); doc.setFontSize(8);
+  pillTexts.reverse().forEach(t => { doc.text(t, px, y+7, {align:'right'}); px -= doc.getTextWidth(t)+10; });
+  if (qr.plan) { doc.setTextColor(255,215,0); doc.setFont('helvetica','bold'); doc.text(`Plan: ${qr.plan}  |`, M+6, y+13); }
+  doc.setTextColor(200,220,255); doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
+  doc.text(qr.coverage==='floater'?'Family Floater':'Individual', M+(qr.plan?`Plan: ${qr.plan}  |`.length*2+6:6), y+13);
+
+  y += 22;
+
+  // ── MEMBER TABLE ──
+  doc.setTextColor(15,34,64); doc.setFont('helvetica','bold'); doc.setFontSize(9);
+  doc.text('Member-wise Premium Breakdown', M, y);
   y += 4;
 
-  let tableHead, tableBody;
+  let tHead, tBody;
   if (qr.plan) {
-    // YB
-    tableHead = [['Member','Age','Base Premium (₹)','HP Adjustment','Member Premium (₹)']];
-    tableBody = qr.memberRows.map(r => [
-      r.name, r.age,
+    tHead = [['Member','Age','Base (₹)','HP Adj.','Premium (₹)']];
+    tBody = qr.memberRows.map(r=>[
+      r.name, String(r.age),
       Math.round(r.base).toLocaleString('en-IN'),
-      r.hpNet !== 0 ? (r.hpNet > 0 ? '+' : '') + r.hpNet + '%' : '—',
+      r.hpNet?(r.hpNet>0?'+':'')+r.hpNet+'%':'—',
       Math.round(r.afterHP).toLocaleString('en-IN')
     ]);
-    tableBody.push(['','','','Sub-total', Math.round(qr.subtotal).toLocaleString('en-IN')]);
-    if (qr.floaterDisc) tableBody.push(['','','',`Floater Discount (${qr.mems.length} members, −${qr.floaterDisc*100}%)`, '−'+Math.round(qr.subtotal*qr.floaterDisc).toLocaleString('en-IN')]);
-    if (qr.loyalty) tableBody.push(['','','','Loyalty Discount −2.5%', '−'+Math.round(qr.afterFloater*0.025).toLocaleString('en-IN')]);
-    if (qr.termDisc) tableBody.push(['','','',`Long-Term Discount (${qr.term} yrs, −${qr.termDisc*100}%)`, '−'+Math.round(qr.afterLoyalty*qr.termDisc).toLocaleString('en-IN')]);
-    if (qr.maternity) tableBody.push(['','','',`Optional: Enhanced Maternity (${qr.matLabel})`, Math.round(qr.matPrem).toLocaleString('en-IN')]);
-    tableBody.push(['','','',`TOTAL ${(qr.mode||'').toUpperCase()} PREMIUM (₹)`, Math.round(qr.grandTotal).toLocaleString('en-IN')]);
+    tBody.push(['','','','Sub-total',Math.round(qr.subtotal).toLocaleString('en-IN')]);
+    if (qr.floaterDisc) tBody.push(['','','',`Floater Disc. −${qr.floaterDisc*100}%`,'−'+Math.round(qr.subtotal*qr.floaterDisc).toLocaleString('en-IN')]);
+    if (qr.loyalty) tBody.push(['','','','Loyalty Disc. −2.5%','−'+Math.round(qr.afterFloater*0.025).toLocaleString('en-IN')]);
+    if (qr.termDisc) tBody.push(['','','',`Long-Term Disc. −${qr.termDisc*100}%`,'−'+Math.round(qr.afterLoyalty*qr.termDisc).toLocaleString('en-IN')]);
+    if (qr.maternity) tBody.push(['','','',`Maternity Cover (${qr.matLabel})`,Math.round(qr.matPrem).toLocaleString('en-IN')]);
+    tBody.push(['','','',`TOTAL ${(qr.mode||'').toUpperCase()} PREMIUM`,Math.round(qr.grandTotal).toLocaleString('en-IN')]);
   } else {
-    // NIF
-    const hasCat = qr.cataract;
-    tableHead = hasCat ?
-      [['Member','Age','Base Premium (₹)','Cataract Cover (₹)','Member Total (₹)']] :
-      [['Member','Age','Base Premium (₹)']];
-    tableBody = qr.memberRows.map(r => hasCat ?
-      [r.name, r.age, Math.round(r.base).toLocaleString('en-IN'), Math.round(r.catPrem).toLocaleString('en-IN'), Math.round(r.base+r.catPrem).toLocaleString('en-IN')] :
-      [r.name, r.age, Math.round(r.base).toLocaleString('en-IN')]
-    );
-    const cols = hasCat ? 4 : 2;
-    tableBody.push([...Array(cols).fill(''), Math.round(qr.combined).toLocaleString('en-IN')].map((v,i)=>i===cols-1?v:(i===0?'Sub-total':'')));
-    // simplify - add as separate rows
-    tableBody[tableBody.length-1] = [...Array(cols-1).fill(''), 'Sub-total', Math.round(qr.combined).toLocaleString('en-IN')];
-    if (qr.floaterDisc) tableBody.push([...Array(cols-1).fill(''), `Floater −${qr.floaterDisc*100}%`, '−'+Math.round(qr.combined*qr.floaterDisc).toLocaleString('en-IN')]);
-    if (qr.termDisc) tableBody.push([...Array(cols-1).fill(''), `Long-Term −${qr.termDisc*100}%`, '−'+Math.round(qr.afterFloater*qr.termDisc).toLocaleString('en-IN')]);
-    tableBody.push([...Array(cols-1).fill(''), 'TOTAL ANNUAL PREMIUM (₹)', Math.round(qr.afterTerm).toLocaleString('en-IN')]);
+    const hc = qr.cataract;
+    tHead = hc ? [['Member','Age','Base (₹)','Cataract (₹)','Total (₹)']] : [['Member','Age','Annual Premium (₹)']];
+    tBody = qr.memberRows.map(r => hc
+      ? [r.name,String(r.age),Math.round(r.base).toLocaleString('en-IN'),Math.round(r.catPrem).toLocaleString('en-IN'),Math.round(r.base+r.catPrem).toLocaleString('en-IN')]
+      : [r.name,String(r.age),Math.round(r.base).toLocaleString('en-IN')]);
+    const cc = hc?4:2;
+    tBody.push([...Array(cc-1).fill(''),'Sub-total',Math.round(qr.combined).toLocaleString('en-IN')]);
+    if (qr.floaterDisc) tBody.push([...Array(cc-1).fill(''),`Floater Disc. −${qr.floaterDisc*100}%`,'−'+Math.round(qr.combined*qr.floaterDisc).toLocaleString('en-IN')]);
+    if (qr.termDisc) tBody.push([...Array(cc-1).fill(''),`Long-Term Disc. −${qr.termDisc*100}%`,'−'+Math.round(qr.afterFloater*qr.termDisc).toLocaleString('en-IN')]);
+    tBody.push([...Array(cc-1).fill(''),'TOTAL ANNUAL PREMIUM',Math.round(qr.afterTerm).toLocaleString('en-IN')]);
   }
 
+  const lastIdx = tBody.length-1;
   doc.autoTable({
-    head: tableHead,
-    body: tableBody,
-    startY: y,
-    margin: {left:14, right:14},
-    headStyles: {fillColor:[26,46,74], textColor:255, fontSize:8.5, fontStyle:'bold'},
-    bodyStyles: {fontSize:8.5},
-    alternateRowStyles: {fillColor:[248,250,255]},
-    didParseCell: function(data) {
-      const lastRow = tableBody.length - 1;
-      if (data.row.index === lastRow && data.section === 'body') {
-        data.cell.styles.fontStyle = 'bold';
-        data.cell.styles.fillColor = [26, 46, 74];
-        data.cell.styles.textColor = [255, 215, 0];
-        data.cell.styles.fontSize = 9.5;
+    head: tHead, body: tBody,
+    startY: y, margin:{left:M,right:M},
+    tableWidth: W-2*M,
+    headStyles:{fillColor:[15,34,64],textColor:255,fontSize:8,fontStyle:'bold',cellPadding:5},
+    bodyStyles:{fontSize:8.5,cellPadding:4.5},
+    alternateRowStyles:{fillColor:[248,251,255]},
+    columnStyles: tHead[0].length===5
+      ? {0:{cellWidth:42},1:{cellWidth:16,halign:'center'},2:{cellWidth:32,halign:'right'},3:{cellWidth:28,halign:'center'},4:{cellWidth:38,halign:'right'}}
+      : tHead[0].length===3
+        ? {0:{cellWidth:50},1:{cellWidth:20,halign:'center'},2:{cellWidth:70,halign:'right'}}
+        : {0:{cellWidth:40},1:{cellWidth:16,halign:'center'},2:{cellWidth:30,halign:'right'},3:{cellWidth:28,halign:'right'},4:{cellWidth:30,halign:'right'}},
+    didParseCell(data) {
+      if (data.section==='body' && data.row.index===lastIdx) {
+        data.cell.styles.fillColor=[15,34,64];
+        data.cell.styles.textColor=[255,215,0];
+        data.cell.styles.fontStyle='bold';
+        data.cell.styles.fontSize=9.5;
+      }
+      // sub-total & discount rows
+      const row = tBody[data.row.index];
+      if (data.section==='body' && row && row[0]==='' && data.row.index<lastIdx) {
+        const label = row[row.length-2]||'';
+        if (label==='Sub-total') { data.cell.styles.fontStyle='bold'; data.cell.styles.fillColor=[235,240,250]; }
+        else if (label.includes('Disc')) { data.cell.styles.textColor=[5,100,70]; data.cell.styles.fillColor=[240,253,244]; }
       }
     }
   });
 
   y = doc.lastAutoTable.finalY + 8;
 
-  // Notes
-  doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(80,80,80);
-  if (qr.zoneLabel && qr.zoneLabel.includes('Zone 2') && !qr.plan) {
-    doc.setTextColor(180, 80, 0);
-    doc.text('Co-payment Note: 20% co-payment applies if Zone 2 insured members avail treatment at Zone 1 hospitals.', 14, y);
-    y += 5; doc.setTextColor(80,80,80);
+  // ── COMMISSION BOX (if showing) ──
+  if (document.getElementById('showCommission').checked && quoteResult) {
+    const oldestAge = Math.max(...qr.mems.map(m=>m.age||0));
+    const tp = qr.grandTotal ?? qr.afterTerm;
+    const rates = getCommissionRates(oldestAge);
+    const comm = Math.round(tp*rates.commPct/100);
+    const inc  = Math.round(tp*rates.incPct/100);
+    const tot  = Math.round(tp*rates.totalPct/100);
+
+    // Check page space
+    if (y + 52 > 272) { doc.addPage(); y = 16; }
+
+    doc.setTextColor(15,34,64); doc.setFont('helvetica','bold'); doc.setFontSize(9);
+    doc.text('Agent Commission & Incentive  (Fresh Business)', M, y); y+=4;
+
+    doc.setFillColor(15,25,50);
+    doc.roundedRect(M, y, W-2*M, 44, 3, 3, 'F');
+
+    // Band info
+    doc.setTextColor(150,180,220); doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
+    doc.text(`Oldest insured: ${oldestAge} yrs  |  Band: ${rates.band}  |  Premium basis: ${Math.round(tp).toLocaleString('en-IN')}`, M+4, y+8);
+
+    const bW = (W-2*M-12)/3;
+    const boxes = [
+      {label:'COMMISSION @15%', amt:comm, pct:rates.commPct+'%', r:37,g:99,b:168},
+      {label:'INCENTIVE', amt:inc, pct:rates.incPct+'%', r:5,g:120,b:80},
+      {label:'TOTAL AWARD', amt:tot, pct:rates.totalPct+'%', r:146,g:64,b:14}
+    ];
+    boxes.forEach((b,i) => {
+      const bx = M+4 + i*(bW+4), by = y+12;
+      doc.setFillColor(b.r,b.g,b.b);
+      doc.roundedRect(bx,by,bW,28,2,2,'F');
+      doc.setTextColor(200,220,255); doc.setFont('helvetica','normal'); doc.setFontSize(7);
+      doc.text(b.label, bx+bW/2, by+6, {align:'center'});
+      doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(11);
+      doc.text('₹'+b.amt.toLocaleString('en-IN'), bx+bW/2, by+17, {align:'center'});
+      doc.setFillColor(255,255,255); doc.setFillColor(255,255,255,0.15);
+      doc.setTextColor(255,215,0); doc.setFont('helvetica','bold'); doc.setFontSize(8);
+      doc.text(b.pct, bx+bW/2, by+25, {align:'center'});
+    });
+    y += 52;
   }
-  doc.text('• Premium is excluding GST. GST: Nil effective 22nd September 2025.', 14, y); y += 4.5;
-  doc.text('• Health parameter discounts/loadings apply only to members aged 18 years and above (Yuva Bharat).', 14, y); y += 4.5;
-  doc.text('• This quotation is indicative. Final premium subject to insurer underwriting and policy issuance.', 14, y); y += 4.5;
 
-  // Footer
-  const pageH = doc.internal.pageSize.height;
-  doc.setFillColor(26,46,74);
-  doc.rect(0, pageH-14, 210, 14, 'F');
-  doc.setTextColor(255,255,255); doc.setFontSize(7.5);
-  doc.text('This is a computer-generated quotation. New India Assurance Co. Ltd.', 105, pageH-8, {align:'center'});
-  doc.text(`Generated by: ${agent} | Date: ${today}`, 105, pageH-4, {align:'center'});
+  // ── FOOTER ──
+  const pH = doc.internal.pageSize.height;
+  doc.setFillColor(15,34,64);
+  doc.rect(0,pH-12,W,12,'F');
+  doc.setFillColor(37,99,168);
+  doc.rect(0,pH-13,W,1,'F');
+  doc.setTextColor(150,180,220); doc.setFont('helvetica','normal'); doc.setFontSize(7);
+  doc.text('This is a computer-generated premium quotation. Subject to policy terms & conditions.', W/2, pH-7, {align:'center'});
+  doc.text(`Generated by: ${agent}  ·  ${today}`, W/2, pH-3, {align:'center'});
 
-  doc.save(`Premium_Quote_${custName.replace(/\s+/g,'_')}_${today.replace(/\s/g,'')}.pdf`);
-}
-
-// =============================================================================
-// COMMISSION
-// =============================================================================
-
-// Commission structure (Fresh business only)
-// Age of oldest insured: <40 → 15%+25%=40%; 40-<55 → 15%+12%=27%; >=55 → 15%+0%=15%
-function getCommissionRates(oldestAge) {
-  if (oldestAge < 40) return {commPct:15, incPct:25, totalPct:40, band:'Below 40 years'};
-  if (oldestAge < 55) return {commPct:15, incPct:12, totalPct:27, band:'40 to <55 years'};
-  return {commPct:15, incPct:0, totalPct:15, band:'55 years & above'};
-}
-
-function toggleCommission() {
-  const show = document.getElementById('showCommission').checked;
-  document.getElementById('commissionBody').classList.toggle('hidden', !show);
-  if (show && quoteResult) renderCommission();
-}
-
-function renderCommission() {
-  if (!quoteResult) return;
-  const mems = quoteResult.mems;
-  const oldestAge = Math.max(...mems.map(m => m.age || 0));
-  const totalPremium = quoteResult.grandTotal ?? quoteResult.afterTerm;
-  const rates = getCommissionRates(oldestAge);
-  const commission = totalPremium * rates.commPct / 100;
-  const incentive  = totalPremium * rates.incPct  / 100;
-  const totalAward = totalPremium * rates.totalPct / 100;
-
-  document.getElementById('commissionBody2').innerHTML = `
-    <tr>
-      <td>${rates.band}</td>
-      <td><span class="tag">Fresh</span></td>
-      <td><strong>${fmt(totalPremium)}</strong></td>
-      <td style="color:#fcd34d;font-weight:700">${fmt(commission)} <span style="font-size:11px;opacity:.8">(${rates.commPct}%)</span></td>
-      <td style="color:#86efac;font-weight:700">${fmt(incentive)} <span style="font-size:11px;opacity:.8">(${rates.incPct}%)</span></td>
-      <td style="color:#ffd700;font-size:15px;font-weight:900">${fmt(totalAward)} <span style="font-size:11px;opacity:.8">(${rates.totalPct}%)</span></td>
-    </tr>`;
+  doc.save(`Quote_${custName.replace(/\s+/g,'_')}_${today.replace(/\s/g,'')}.pdf`);
 }
 
 // =============================================================================
 // INIT
 // =============================================================================
-
 window.addEventListener('DOMContentLoaded', init);
-</script>
-</body>
-</html>
+</script></body></html>
