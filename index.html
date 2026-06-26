@@ -1237,49 +1237,6 @@ function generatePDF() {
 
   y = doc.lastAutoTable.finalY + 8;
 
-  // ── COMMISSION BOX (if showing) ──
-  if (document.getElementById('showCommission').checked && quoteResult) {
-    const oldestAge = Math.max(...qr.mems.map(m=>m.age||0));
-    const tp = qr.grandTotal ?? qr.afterTerm;
-    const rates = getCommissionRates(oldestAge);
-    const comm = Math.round(tp*rates.commPct/100);
-    const inc  = Math.round(tp*rates.incPct/100);
-    const tot  = Math.round(tp*rates.totalPct/100);
-
-    // Check page space
-    if (y + 52 > 272) { doc.addPage(); y = 16; }
-
-    doc.setTextColor(15,34,64); doc.setFont('helvetica','bold'); doc.setFontSize(9);
-    doc.text('Agent Commission & Incentive  (Fresh Business)', M, y); y+=4;
-
-    doc.setFillColor(15,25,50);
-    doc.roundedRect(M, y, W-2*M, 44, 3, 3, 'F');
-
-    // Band info
-    doc.setTextColor(150,180,220); doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
-    doc.text(`Oldest insured: ${oldestAge} yrs  |  Band: ${rates.band}  |  Premium basis: ${Math.round(tp).toLocaleString('en-IN')}`, M+4, y+8);
-
-    const bW = (W-2*M-12)/3;
-    const boxes = [
-      {label:'COMMISSION @15%', amt:comm, pct:rates.commPct+'%', r:37,g:99,b:168},
-      {label:'INCENTIVE', amt:inc, pct:rates.incPct+'%', r:5,g:120,b:80},
-      {label:'TOTAL AWARD', amt:tot, pct:rates.totalPct+'%', r:146,g:64,b:14}
-    ];
-    boxes.forEach((b,i) => {
-      const bx = M+4 + i*(bW+4), by = y+12;
-      doc.setFillColor(b.r,b.g,b.b);
-      doc.roundedRect(bx,by,bW,28,2,2,'F');
-      doc.setTextColor(200,220,255); doc.setFont('helvetica','normal'); doc.setFontSize(7);
-      doc.text(b.label, bx+bW/2, by+6, {align:'center'});
-      doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(11);
-      doc.text('₹'+b.amt.toLocaleString('en-IN'), bx+bW/2, by+17, {align:'center'});
-      doc.setFillColor(255,255,255); doc.setFillColor(255,255,255,0.15);
-      doc.setTextColor(255,215,0); doc.setFont('helvetica','bold'); doc.setFontSize(8);
-      doc.text(b.pct, bx+bW/2, by+25, {align:'center'});
-    });
-    y += 52;
-  }
-
   // ── FOOTER ──
   const pH = doc.internal.pageSize.height;
   doc.setFillColor(15,34,64);
