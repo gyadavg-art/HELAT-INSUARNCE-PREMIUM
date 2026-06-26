@@ -1305,6 +1305,74 @@ function generatePDF() {
   y += 24;
 
   // ─────────────────────────────────────────────────────
+  // 3b. COVERAGE HIGHLIGHTS
+  // ─────────────────────────────────────────────────────
+  const COVERAGE_HIGHLIGHTS = {
+    yb: {
+      Basic: [
+        ['In-patient Hospitalisation',   'Room, ICU, surgery & nursing expenses covered'],
+        ['Pre & Post Hospitalisation',   '30 days pre / 60 days post discharge expenses'],
+        ['Day Care Procedures',          '541 day-care treatments without 24-hr admission'],
+        ['Emergency Ambulance',          'Road ambulance charges up to ₹2,000 per hospitalisation'],
+        ['Domiciliary Hospitalisation',  'Treatment at home if hospital admission not possible'],
+      ],
+      Gold: [
+        ['In-patient Hospitalisation',   'Room, ICU, surgery & nursing expenses covered'],
+        ['AYUSH Treatment',              'Ayurveda, Yoga, Unani, Siddha & Homeopathy covered'],
+        ['Organ Donor Expenses',         'Medical expenses of organ donor during harvesting'],
+        ['Day Care Procedures',          '541 day-care treatments without 24-hr admission'],
+        ['Cumulative Bonus',             '5% bonus on SI per claim-free year (up to 50%)'],
+      ],
+      Platinum: [
+        ['In-patient Hospitalisation',   'Room, ICU, surgery & nursing expenses covered'],
+        ['Maternity Benefit',            'Normal ₹35,000 / C-Section ₹50,000 (2-yr waiting period)'],
+        ['New Born Baby Cover',          'New born covered from day 1 within maternity benefit'],
+        ['AYUSH & Organ Donor',          'AYUSH treatment + organ donor harvesting expenses'],
+        ['Cumulative Bonus',             '5% bonus on SI per claim-free year (up to 50%)'],
+      ],
+    },
+    nif: [
+      ['Family Floater Cover',         'Single sum insured shared across all insured members'],
+      ['In-patient Hospitalisation',   'Room (1% of SI/day), ICU (2% of SI/day), surgery & nursing'],
+      ['Pre & Post Hospitalisation',   '30 days pre-hospitalisation / 60 days post-discharge'],
+      ['Day Care Procedures',          'Listed day-care procedures without 24-hr admission'],
+      ['Ambulance Charges',            'Emergency road ambulance up to ₹1,500 per hospitalisation'],
+    ],
+  };
+
+  const highlights = qr.plan
+    ? (COVERAGE_HIGHLIGHTS.yb[qr.plan] || COVERAGE_HIGHLIGHTS.yb.Basic)
+    : COVERAGE_HIGHLIGHTS.nif;
+
+  // Section pill label
+  fill(BLUE); doc.roundedRect(M, y-5, 52, 8, 2, 2, 'F');
+  bf(8,'bold'); txt(WHITE); doc.text('COVERAGE HIGHLIGHTS', M+4, y);
+  y += 5;
+
+  // 5-cell grid (2 cols × 3 rows, last row may have 1 cell)
+  const hCols = 2, hCW = TW / hCols, hRH = 14;
+  highlights.forEach(([title, desc], idx) => {
+    const col = idx % hCols;
+    const row = Math.floor(idx / hCols);
+    const hx = M + col * hCW;
+    const hy = y + row * hRH;
+    // alternating bg
+    const bg = idx % 2 === 0 ? [245,248,255] : [255,255,255];
+    fill(bg); drw([210,220,238]); doc.setLineWidth(0.15);
+    doc.rect(hx, hy, hCW, hRH, 'FD');
+    // teal left accent
+    fill(TEAL); doc.rect(hx, hy, 3, hRH, 'F');
+    // bullet dot
+    fill(BLUE); doc.circle(hx+7, hy+5.5, 1, 'F');
+    // title
+    bf(8,'bold'); txt(NAVY); doc.text(title, hx+11, hy+6);
+    // desc
+    bf(7,'normal'); txt(DGRAY); doc.text(desc, hx+11, hy+11, {maxWidth: hCW-14});
+  });
+
+  y += Math.ceil(highlights.length / hCols) * hRH + 8;
+
+  // ─────────────────────────────────────────────────────
   // 4. BUILD TABLE ROWS + ROW TYPE METADATA
   // ─────────────────────────────────────────────────────
   // row types: mhdr | base | hpd | hpl | mnet | gap | sub | disc | opt | total
