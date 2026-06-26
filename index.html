@@ -1316,176 +1316,180 @@ function generatePDF() {
   const hl = qr.plan ? (CH.yb[qr.plan]||CH.yb.Basic) : CH.nif;
 
   // label pill
-  fill(TEAL); doc.roundedRect(M,y,45,6,1.5,1.5,'F');
-  bf(6.5,'bold'); txt(WHITE); doc.text('COVERAGE HIGHLIGHTS', M+3, y+4.3);
+  fill(TEAL); doc.roundedRect(M,y,45,7,1.5,1.5,'F');
+  bf(7.5,'bold'); txt(WHITE); doc.text('COVERAGE HIGHLIGHTS', M+3, y+5);
 
-  y += 8;
-  const pCW = TW/5, pRH = 10;
+  y += 9;
+  const pCW = TW/5, pRH = 13;
   hl.forEach((title,i)=>{
     const px = M + i*pCW;
     const bg = i%2===0 ? [241,246,255] : [255,255,255];
     fill(bg); drw([195,212,240]); lw(0.15);
     doc.rect(px, y, pCW, pRH, 'FD');
-    fill(TEAL); doc.rect(px, y, 2.5, pRH, 'F');       // teal accent
-    fill(BLUE); doc.circle(px+5.5, y+3.8, 0.9, 'F');  // bullet
-    bf(6.5,'bold'); txt(NAVY);
-    doc.text(title, px+8, y+4, {maxWidth: pCW-10});    // title may wrap
-    // if title wraps, pRH=10 keeps it tidy for short titles
+    fill(TEAL); doc.rect(px, y, 2.5, pRH, 'F');
+    fill(BLUE); doc.circle(px+5.5, y+4.5, 1, 'F');
+    bf(7.5,'bold'); txt(NAVY);
+    doc.text(title, px+8.5, y+5.2, {maxWidth: pCW-11});
   });
   y += pRH + 5;
 
   // ══════════════════════════════════════════════════════
-  // 4. BUILD TABLE ROWS
-  // row types: mhdr | base | hpd | hpl | mnet | gap | sub | disc | opt | total
+  // 4. DETERMINE TABLE LAYOUT
   // ══════════════════════════════════════════════════════
-  const rows=[], rt=[];
-  const addRow = (lbl,val,type) => { rows.push([lbl,val]); rt.push(type); };
+  const hasHP  = !!qr.plan && qr.memberRows.some(r=>(r.hpDiscounts||[]).length>0);
+  const hasCat = !qr.plan  && qr.cataract   && qr.memberRows.some(r=>r.catPrem);
 
-  if (qr.plan) {
-    qr.memberRows.forEach((r,i)=>{
-      if(i>0) addRow('','','gap');
-      addRow(`${r.name||'Member '+(i+1)}`, `Age: ${r.age}`, 'mhdr');
-      addRow('Base Premium', `₹${Math.round(r.base).toLocaleString('en-IN')}`, 'base');
-      (r.hpDiscounts||[]).forEach(d=>{
-        const amt=Math.abs(Math.round(r.base*d.pct/100));
-        addRow(`${d.pct<0?'↓':'↑'} ${d.label}  (${d.pct>0?'+':''}${d.pct}%)`,
-               `${d.pct<0?'−':'+'} ₹${amt.toLocaleString('en-IN')}`, d.pct<0?'hpd':'hpl');
-      });
-      if((r.hpDiscounts||[]).length)
-        addRow('Net Member Premium', `₹${Math.round(r.afterHP).toLocaleString('en-IN')}`, 'mnet');
-    });
-    if(qr.memberRows.length>1||qr.floaterDisc||qr.loyalty||qr.termDisc){
-      addRow('','','gap');
-      addRow('Sub-total  (All Members)', `₹${Math.round(qr.subtotal).toLocaleString('en-IN')}`, 'sub');
-    }
-    if(qr.floaterDisc){
-      const n=qr.mems.length,p=qr.floaterDisc*100;
-      addRow(`↓ Family Floater Discount — ${n} Members  (−${p}%)`,
-             `− ₹${Math.round(qr.subtotal*qr.floaterDisc).toLocaleString('en-IN')}`, 'disc');
-    }
-    if(qr.loyalty)
-      addRow('↓ Loyalty Discount (−2.5%)  —  Existing NIA Policy ≥ ₹5,000',
-             `− ₹${Math.round(qr.afterFloater*0.025).toLocaleString('en-IN')}`, 'disc');
-    if(qr.termDisc)
-      addRow(`↓ Long-Term Discount — ${qr.term} Years  (−${qr.termDisc*100}%)`,
-             `− ₹${Math.round(qr.afterLoyalty*qr.termDisc).toLocaleString('en-IN')}`, 'disc');
-    if(qr.maternity)
-      addRow(`★ Optional: Enhanced Maternity  (${qr.matLabel})`,
-             `₹${Math.round(qr.matPrem).toLocaleString('en-IN')}`, 'opt');
-    addRow(`TOTAL ${(qr.mode||'').toUpperCase()} PREMIUM`,
-           `₹${Math.round(qr.grandTotal).toLocaleString('en-IN')}`, 'total');
+  // Column definitions per scenario
+  // YB no HP  → [Member, Age, Base Premium]
+  // YB HP     → [Member, Age, Base Premium, Health Adj., Net Premium]
+  // NIF no cat→ [Member, Age, Base Premium]
+  // NIF cat   → [Member, Age, Base Premium, Cataract, Member Total]
+  let headCols, colWidths;
+  if (qr.plan && hasHP) {
+    headCols  = ['Member Name', 'Age', 'Base Premium', 'Health Adj.', 'Net Premium'];
+    colWidths = [TW*0.38, TW*0.07, TW*0.18, TW*0.18, TW*0.19];
+  } else if (!qr.plan && hasCat) {
+    headCols  = ['Member Name', 'Age', 'Base Premium', 'Cataract', 'Member Total'];
+    colWidths = [TW*0.38, TW*0.07, TW*0.20, TW*0.17, TW*0.18];
   } else {
-    qr.memberRows.forEach((r,i)=>{
-      if(i>0) addRow('','','gap');
-      addRow(`${r.name||'Member '+(i+1)}`, `Age: ${r.age}`, 'mhdr');
-      addRow('Annual Base Premium', `₹${Math.round(r.base).toLocaleString('en-IN')}`, 'base');
-      if(qr.cataract&&r.catPrem){
-        addRow('★ Optional: Cataract Cover (Revised Limit)',
-               `₹${Math.round(r.catPrem).toLocaleString('en-IN')}`, 'opt');
-        addRow('Member Sub-total',
-               `₹${Math.round(r.base+r.catPrem).toLocaleString('en-IN')}`, 'mnet');
-      }
-    });
-    addRow('','','gap');
-    addRow('Sub-total  (All Members)', `₹${Math.round(qr.combined).toLocaleString('en-IN')}`, 'sub');
-    if(qr.floaterDisc){
-      const n=qr.mems.length,p=qr.floaterDisc*100;
-      addRow(`↓ Family Floater Discount — ${n} Members  (−${p}%)`,
-             `− ₹${Math.round(qr.combined*qr.floaterDisc).toLocaleString('en-IN')}`, 'disc');
-    }
-    if(qr.termDisc)
-      addRow(`↓ Long-Term Discount — ${qr.term} Years  (−${qr.termDisc*100}%)`,
-             `− ₹${Math.round(qr.afterFloater*qr.termDisc).toLocaleString('en-IN')}`, 'disc');
-    addRow('TOTAL ANNUAL PREMIUM', `₹${Math.round(qr.afterTerm).toLocaleString('en-IN')}`, 'total');
+    headCols  = ['Member Name', 'Age', 'Base Premium'];
+    colWidths = [TW*0.52, TW*0.10, TW*0.38];
   }
+  const nCols = headCols.length;
 
   // ══════════════════════════════════════════════════════
-  // 5. SECTION LABEL
+  // 5. SECTION LABEL + TABLE 1: MEMBER ROWS
   // ══════════════════════════════════════════════════════
   fill(TEAL); doc.roundedRect(M,y,48,6,1.5,1.5,'F');
   bf(6.5,'bold'); txt(WHITE); doc.text('PREMIUM BREAKDOWN', M+3, y+4.3);
   y += 8;
 
-  // ══════════════════════════════════════════════════════
-  // 6. AUTO TABLE  (compact rows)
-  // ══════════════════════════════════════════════════════
+  // Build member body rows
+  const mBody = qr.memberRows.map((r,i)=>{
+    const name = r.name || `Member ${i+1}`;
+    const base = `₹${Math.round(r.base).toLocaleString('en-IN')}`;
+    if (qr.plan && hasHP) {
+      const hpPct = r.hpNet||0;
+      const hpAmt = Math.abs(Math.round(r.base*hpPct/100));
+      const hpCell = hpPct===0 ? '—'
+        : `${hpPct<0?'↓':'↑'} ${hpPct<0?'':'+'}${hpPct}%\n(${hpPct<0?'−':'+'}₹${hpAmt.toLocaleString('en-IN')})`;
+      return [name, String(r.age), base, hpCell, `₹${Math.round(r.afterHP).toLocaleString('en-IN')}`];
+    } else if (!qr.plan && hasCat) {
+      const cat = r.catPrem ? `₹${Math.round(r.catPrem).toLocaleString('en-IN')}` : '—';
+      const tot = `₹${Math.round(r.base+(r.catPrem||0)).toLocaleString('en-IN')}`;
+      return [name, String(r.age), base, cat, tot];
+    } else {
+      return [name, String(r.age), base];
+    }
+  });
+
+  // hpNet per row for colour coding col 3
+  const hpNets = qr.memberRows.map(r=>r.hpNet||0);
+
+  const colStylesObj = {};
+  headCols.forEach((_,i)=>{
+    colStylesObj[i] = { cellWidth: colWidths[i], halign: i>=2?'right':'left' };
+  });
+
   doc.autoTable({
-    body: rows,
+    head: [headCols],
+    body: mBody,
+    startY: y, margin:{left:M,right:M}, tableWidth:TW,
+    styles:{fontSize:8, cellPadding:{top:3.5,bottom:3.5,left:6,right:6},
+            lineColor:[210,222,242], lineWidth:0.18, valign:'middle', overflow:'linebreak'},
+    headStyles:{
+      fillColor:BLUE, textColor:WHITE, fontStyle:'bold', fontSize:7.5,
+      cellPadding:{top:3.5,bottom:3.5,left:6,right:6}, halign:'center'
+    },
+    columnStyles: colStylesObj,
+    didParseCell(d){
+      if(d.section==='body'){
+        const isEven = d.row.index%2===0;
+        d.cell.styles.fillColor = isEven ? [246,249,255] : WHITE;
+        d.cell.styles.textColor = NAVY;
+        d.cell.styles.fontStyle = d.column.index>=2 ? 'bold' : 'normal';
+        // HP Adj column colour-code
+        if((qr.plan && hasHP && d.column.index===3) || (!qr.plan && hasCat && d.column.index===3)){
+          const hp = hpNets[d.row.index]||0;
+          if(hp<0){ d.cell.styles.textColor=DGREEN; d.cell.styles.fillColor=isEven?[220,252,231]:LGREEN; }
+          else if(hp>0){ d.cell.styles.textColor=RED; d.cell.styles.fillColor=isEven?[254,226,226]:LRED; }
+          else { d.cell.styles.textColor=DGRAY; }
+        }
+      }
+    }
+  });
+
+  y = doc.lastAutoTable.finalY;
+
+  // ══════════════════════════════════════════════════════
+  // 6. TABLE 2: SUMMARY ROWS (sub-total, discounts, total)
+  // ══════════════════════════════════════════════════════
+  const srows=[], srt=[];
+  const addS = (lbl,val,type)=>{ srows.push([lbl,val]); srt.push(type); };
+
+  if (qr.plan) {
+    if(qr.memberRows.length>1||qr.floaterDisc||qr.loyalty||qr.termDisc)
+      addS('Sub-total  (All Members)', `₹${Math.round(qr.subtotal).toLocaleString('en-IN')}`, 'sub');
+    if(qr.floaterDisc){
+      const n=qr.mems.length,p=qr.floaterDisc*100;
+      addS(`↓ Family Floater Discount — ${n} Members  (−${p}%)`,
+           `− ₹${Math.round(qr.subtotal*qr.floaterDisc).toLocaleString('en-IN')}`, 'disc');
+    }
+    if(qr.loyalty)
+      addS('↓ Loyalty Discount (−2.5%)  —  Existing NIA Policy ≥ ₹5,000',
+           `− ₹${Math.round(qr.afterFloater*0.025).toLocaleString('en-IN')}`, 'disc');
+    if(qr.termDisc)
+      addS(`↓ Long-Term Discount — ${qr.term} Years  (−${qr.termDisc*100}%)`,
+           `− ₹${Math.round(qr.afterLoyalty*qr.termDisc).toLocaleString('en-IN')}`, 'disc');
+    if(qr.maternity)
+      addS(`★ Optional: Enhanced Maternity  (${qr.matLabel})`,
+           `₹${Math.round(qr.matPrem).toLocaleString('en-IN')}`, 'opt');
+    addS(`TOTAL ${(qr.mode||'').toUpperCase()} PREMIUM`,
+         `₹${Math.round(qr.grandTotal).toLocaleString('en-IN')}`, 'total');
+  } else {
+    addS('Sub-total  (All Members)', `₹${Math.round(qr.combined).toLocaleString('en-IN')}`, 'sub');
+    if(qr.floaterDisc){
+      const n=qr.mems.length,p=qr.floaterDisc*100;
+      addS(`↓ Family Floater Discount — ${n} Members  (−${p}%)`,
+           `− ₹${Math.round(qr.combined*qr.floaterDisc).toLocaleString('en-IN')}`, 'disc');
+    }
+    if(qr.termDisc)
+      addS(`↓ Long-Term Discount — ${qr.term} Years  (−${qr.termDisc*100}%)`,
+           `− ₹${Math.round(qr.afterFloater*qr.termDisc).toLocaleString('en-IN')}`, 'disc');
+    addS('TOTAL ANNUAL PREMIUM', `₹${Math.round(qr.afterTerm).toLocaleString('en-IN')}`, 'total');
+  }
+
+  doc.autoTable({
+    body: srows,
     startY: y, margin:{left:M,right:M}, tableWidth:TW,
     styles:{fontSize:8, cellPadding:{top:3,bottom:3,left:7,right:7},
-            lineColor:[215,225,242], lineWidth:0.18, valign:'middle', overflow:'linebreak'},
+            lineColor:[210,222,242], lineWidth:0.18, valign:'middle', overflow:'linebreak'},
     columnStyles:{
       0:{cellWidth:TW*0.68},
       1:{cellWidth:TW*0.32, halign:'right'},
     },
     didParseCell(d){
-      const type=rt[d.row.index], isAmt=d.column.index===1;
+      const type=srt[d.row.index], isAmt=d.column.index===1;
       switch(type){
-        case 'gap':
-          d.cell.styles.fillColor   = [232,238,250];
-          d.cell.styles.cellPadding = {top:1,bottom:1,left:0,right:0};
-          d.cell.styles.lineWidth   = 0;
-          break;
-        case 'mhdr':
-          d.cell.styles.fillColor   = BLUE;
-          d.cell.styles.textColor   = WHITE;
-          d.cell.styles.fontStyle   = 'bold';
-          d.cell.styles.fontSize    = 8.5;
-          d.cell.styles.cellPadding = {top:4,bottom:4,left:7,right:7};
-          if(isAmt){ d.cell.styles.fontSize=7.5; d.cell.styles.textColor=[185,205,245]; }
-          break;
-        case 'base':
-          d.cell.styles.fillColor   = WHITE;
-          d.cell.styles.textColor   = isAmt?NAVY:[55,65,81];
-          d.cell.styles.fontStyle   = isAmt?'bold':'normal';
-          d.cell.styles.cellPadding = {top:3,bottom:3,left:15,right:7};
-          break;
-        case 'hpd':
-          d.cell.styles.fillColor   = LGREEN;
-          d.cell.styles.textColor   = DGREEN;
-          d.cell.styles.fontSize    = 7.5;
-          d.cell.styles.fontStyle   = isAmt?'bold':'normal';
-          d.cell.styles.cellPadding = {top:2.5,bottom:2.5,left:15,right:7};
-          break;
-        case 'hpl':
-          d.cell.styles.fillColor   = LRED;
-          d.cell.styles.textColor   = RED;
-          d.cell.styles.fontSize    = 7.5;
-          d.cell.styles.fontStyle   = isAmt?'bold':'normal';
-          d.cell.styles.cellPadding = {top:2.5,bottom:2.5,left:15,right:7};
-          break;
-        case 'mnet':
-          d.cell.styles.fillColor   = MBLUE;
-          d.cell.styles.textColor   = [15,23,42];
-          d.cell.styles.fontStyle   = 'bold';
-          d.cell.styles.fontSize    = 8;
-          d.cell.styles.cellPadding = {top:3,bottom:3,left:15,right:7};
-          break;
         case 'sub':
-          d.cell.styles.fillColor   = [210,225,255];
-          d.cell.styles.textColor   = NAVY;
-          d.cell.styles.fontStyle   = 'bold';
-          d.cell.styles.fontSize    = 8.5;
-          d.cell.styles.cellPadding = {top:4,bottom:4,left:7,right:7};
+          d.cell.styles.fillColor=[210,225,255]; d.cell.styles.textColor=NAVY;
+          d.cell.styles.fontStyle='bold'; d.cell.styles.fontSize=8.5;
+          d.cell.styles.cellPadding={top:4,bottom:4,left:7,right:7};
           break;
         case 'disc':
-          d.cell.styles.fillColor   = LGREEN;
-          d.cell.styles.textColor   = DGREEN;
-          d.cell.styles.fontStyle   = isAmt?'bold':'normal';
-          d.cell.styles.cellPadding = {top:3,bottom:3,left:15,right:7};
+          d.cell.styles.fillColor=LGREEN; d.cell.styles.textColor=DGREEN;
+          d.cell.styles.fontStyle=isAmt?'bold':'normal';
+          d.cell.styles.cellPadding={top:3,bottom:3,left:14,right:7};
           break;
         case 'opt':
-          d.cell.styles.fillColor   = LGOLD;
-          d.cell.styles.textColor   = DGOLD;
-          d.cell.styles.fontStyle   = isAmt?'bold':'normal';
-          d.cell.styles.cellPadding = {top:3,bottom:3,left:15,right:7};
+          d.cell.styles.fillColor=LGOLD; d.cell.styles.textColor=DGOLD;
+          d.cell.styles.fontStyle=isAmt?'bold':'normal';
+          d.cell.styles.cellPadding={top:3,bottom:3,left:14,right:7};
           break;
         case 'total':
-          d.cell.styles.fillColor   = NAVY;
-          d.cell.styles.textColor   = GOLD;
-          d.cell.styles.fontStyle   = 'bold';
-          d.cell.styles.fontSize    = 10.5;
-          d.cell.styles.cellPadding = {top:6,bottom:6,left:7,right:7};
+          d.cell.styles.fillColor=NAVY; d.cell.styles.textColor=GOLD;
+          d.cell.styles.fontStyle='bold'; d.cell.styles.fontSize=10.5;
+          d.cell.styles.cellPadding={top:6,bottom:6,left:7,right:7};
           break;
       }
     }
