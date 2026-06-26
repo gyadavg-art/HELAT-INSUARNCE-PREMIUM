@@ -991,13 +991,17 @@ function calculateYB(mems) {
   const memberRows = mems.map(m => {
     const base = getYBPremium(plan, zone, mode, siIdx, m.age);
     let hpNet = 0;
+    const hpDiscounts = [];
     if (m.age >= 18) {
-      if (m.bmi==='good') hpNet-=2.5; if (m.bmi==='high') hpNet+=2.5;
-      if (m.hba1c==='good') hpNet-=2.5; if (m.hba1c==='high') hpNet+=2.5;
-      if (m.bp==='good') hpNet-=2.5; if (m.bp==='high') hpNet+=2.5;
-      if (m.noHosp) hpNet-=2.5;
+      if (m.bmi==='good')   { hpNet-=2.5; hpDiscounts.push({label:'BMI 18.5-32',pct:-2.5}); }
+      if (m.bmi==='high')   { hpNet+=2.5; hpDiscounts.push({label:'BMI Above 32 (Loading)',pct:+2.5}); }
+      if (m.hba1c==='good') { hpNet-=2.5; hpDiscounts.push({label:'HbA1c < 6.4 — Non-diabetic',pct:-2.5}); }
+      if (m.hba1c==='high') { hpNet+=2.5; hpDiscounts.push({label:'HbA1c > 6.4 — Diabetic (Loading)',pct:+2.5}); }
+      if (m.bp==='good')    { hpNet-=2.5; hpDiscounts.push({label:'BP <= 120/80',pct:-2.5}); }
+      if (m.bp==='high')    { hpNet+=2.5; hpDiscounts.push({label:'BP Above 139/89 (Loading)',pct:+2.5}); }
+      if (m.noHosp)         { hpNet-=2.5; hpDiscounts.push({label:'No Hospitalisation — Last 3 Years',pct:-2.5}); }
     }
-    return {name:m.name, age:m.age, base, hpNet, afterHP:base*(1+hpNet/100)};
+    return {name:m.name, age:m.age, base, hpNet, hpDiscounts, afterHP:base*(1+hpNet/100)};
   });
 
   const subtotal = memberRows.reduce((s,r)=>s+r.afterHP,0);
@@ -1158,149 +1162,276 @@ function generatePDF() {
   if (typeof window.jspdf === 'undefined') { alert('PDF library not loaded. Check internet connection.'); return; }
   const {jsPDF} = window.jspdf;
   const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  const W = 210, M = 14;
-  const agent = document.getElementById('agentName').value || 'Agent';
-  const agentCode = document.getElementById('agentCode').value;
-  const custName = document.getElementById('custName').value || 'Customer';
-  const custContact = document.getElementById('custContact').value;
-  const today = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
-  const qr = quoteResult;
+  const W=210, M=13, TW=210-2*13;
 
-  // ── HEADER BAND ──
-  doc.setFillColor(15,34,64);
-  doc.rect(0,0,W,28,'F');
-  // accent stripe
-  doc.setFillColor(37,99,168);
-  doc.rect(0,25,W,3,'F');
-  doc.setTextColor(255,255,255);
-  doc.setFont('helvetica','bold'); doc.setFontSize(15);
-  doc.text('UP38- संभल', M, 11);
-  doc.setFont('helvetica','normal'); doc.setFontSize(9);
-  doc.setTextColor(150,180,220);
-  doc.text('स्वास्थ्य बीमा प्रीमियम कैलकुलेटर  |  Health Insurance Premium Quotation', M, 18);
-  doc.setTextColor(255,215,0); doc.setFontSize(8);
-  doc.text('GST: Nil  ·  Fresh Business', W-M, 18, {align:'right'});
-  doc.setTextColor(255,255,255); doc.setFontSize(8);
-  doc.text(`Date: ${today}`, W-M, 11, {align:'right'});
+  const agent      = document.getElementById('agentName').value.trim()    || 'Agent';
+  const agentCode  = document.getElementById('agentCode').value.trim();
+  const custName   = document.getElementById('custName').value.trim()     || 'Customer';
+  const custContact= document.getElementById('custContact').value.trim();
+  const today      = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  const qr         = quoteResult;
 
-  let y = 36;
+  // ── palette ──
+  const NAVY =[15,23,42], BLUE=[30,64,175], LBLUE=[59,130,246], TEAL=[8,145,178];
+  const GREEN=[5,150,105], LGREEN=[209,250,229], DGREEN=[6,95,70];
+  const RED  =[185,28,28], LRED=[254,226,226];
+  const GOLD =[245,158,11], LGOLD=[254,243,199], DGOLD=[146,64,14];
+  const WHITE=[255,255,255], LGRAY=[248,250,252], MGRAY=[226,232,240], DGRAY=[100,116,139];
+  const MBLUE=[219,234,254], DBLUE=[30,64,175];
 
-  // ── INFO BOX ──
-  doc.setFillColor(245,248,255);
-  doc.setDrawColor(200,215,240);
-  doc.roundedRect(M, y, W-2*M, 28, 3, 3, 'FD');
+  // helper: set rgb fill/text
+  const fill = c => doc.setFillColor(...c);
+  const txt  = c => doc.setTextColor(...c);
+  const drw  = c => doc.setDrawColor(...c);
+  const bf   = (sz,st='bold') => { doc.setFont('helvetica',st); doc.setFontSize(sz); };
 
-  // Left: agent
-  doc.setTextColor(100,116,139); doc.setFontSize(8); doc.setFont('helvetica','normal');
-  doc.text('AGENT', M+4, y+7);
-  doc.setTextColor(15,34,64); doc.setFontSize(10); doc.setFont('helvetica','bold');
-  doc.text(agent + (agentCode ? `  [${agentCode}]` : ''), M+4, y+14);
+  // ─────────────────────────────────────────────────────
+  // 1. HEADER  (0 – 32mm)
+  // ─────────────────────────────────────────────────────
+  fill(NAVY); doc.rect(0,0,W,32,'F');
+  fill(GOLD);  doc.rect(0,0,5,32,'F');           // gold left bar
+  fill(TEAL);  doc.rect(0,30,W,2,'F');           // teal bottom stripe
 
-  // Middle: customer
-  doc.setTextColor(100,116,139); doc.setFontSize(8); doc.setFont('helvetica','normal');
-  doc.text('CUSTOMER', W/2-10, y+7);
-  doc.setTextColor(15,34,64); doc.setFontSize(10); doc.setFont('helvetica','bold');
-  doc.text(custName, W/2-10, y+14);
-  if (custContact) { doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(100,116,139); doc.text(custContact, W/2-10, y+20); }
+  bf(19); txt(WHITE);
+  doc.text('UP38 - Sambhal', M+7, 13);
+  bf(8.5,'normal'); txt([148,163,184]);
+  doc.text('Health Insurance Premium Quotation  |  स्वास्थ्य बीमा प्रीमियम', M+7, 20);
+  bf(8); txt(GOLD);
+  doc.text('GST: NIL  w.e.f. 22 Sept 2025', W-M, 13, {align:'right'});
+  bf(7.5,'normal'); txt([148,163,184]);
+  doc.text(`Date: ${today}`, W-M, 20, {align:'right'});
 
-  // Right: quote ref
-  doc.setTextColor(100,116,139); doc.setFontSize(8); doc.setFont('helvetica','normal');
-  doc.text('QUOTE DATE', W-M-4, y+7, {align:'right'});
-  doc.setTextColor(15,34,64); doc.setFontSize(10); doc.setFont('helvetica','bold');
-  doc.text(today, W-M-4, y+14, {align:'right'});
+  let y = 38;
 
-  y += 34;
+  // ─────────────────────────────────────────────────────
+  // 2. AGENT / CUSTOMER / DATE  (3-col box)
+  // ─────────────────────────────────────────────────────
+  const bH = custContact ? 30 : 26;
+  fill(LGRAY); drw(MGRAY); doc.roundedRect(M,y,TW,bH,3,3,'FD');
+  const c1=M+5, c2=M+TW/3+5, c3=M+2*TW/3+5;
+  drw(MGRAY); doc.setLineWidth(0.3);
+  doc.line(M+TW/3,y+3,M+TW/3,y+bH-3);
+  doc.line(M+2*TW/3,y+3,M+2*TW/3,y+bH-3);
 
-  // ── PRODUCT STRIP ──
-  doc.setFillColor(37,99,168);
-  doc.roundedRect(M, y, W-2*M, 16, 3, 3, 'F');
-  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(9.5);
-  doc.text(qr.product, M+6, y+7);
-  // right-side pills
-  const pillTexts = [qr.siLabel, qr.zoneLabel, qr.mode||'Annual', `Term: ${qr.term} yr${qr.term>1?'s':''}`].filter(Boolean);
-  let px = W-M-4;
-  doc.setFont('helvetica','normal'); doc.setFontSize(8);
-  pillTexts.reverse().forEach(t => { doc.text(t, px, y+7, {align:'right'}); px -= doc.getTextWidth(t)+10; });
-  if (qr.plan) { doc.setTextColor(255,215,0); doc.setFont('helvetica','bold'); doc.text(`Plan: ${qr.plan}  |`, M+6, y+13); }
-  doc.setTextColor(200,220,255); doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
-  doc.text(qr.coverage==='floater'?'Family Floater':'Individual', M+(qr.plan?`Plan: ${qr.plan}  |`.length*2+6:6), y+13);
+  const infoBlock = (label,name,sub,cx) => {
+    bf(6.5,'bold'); txt(DGRAY); doc.text(label,cx,y+7);
+    bf(10,'bold');  txt(NAVY);  doc.text(name,cx,y+15);
+    if(sub){bf(8,'normal');txt(DGRAY);doc.text(sub,cx,y+22);}
+  };
+  infoBlock('AGENT', agent+(agentCode?` [${agentCode}]`:''), null, c1);
+  infoBlock('CUSTOMER', custName, custContact||null, c2);
+  infoBlock('QUOTE DATE', today, 'Valid for 30 days', c3);
 
-  y += 22;
+  y += bH + 7;
 
-  // ── MEMBER TABLE ──
-  doc.setTextColor(15,34,64); doc.setFont('helvetica','bold'); doc.setFontSize(9);
-  doc.text('Member-wise Premium Breakdown', M, y);
-  y += 4;
+  // ─────────────────────────────────────────────────────
+  // 3. PRODUCT BANNER
+  // ─────────────────────────────────────────────────────
+  fill(BLUE); doc.roundedRect(M,y,TW,20,3,3,'F');
+  bf(11); txt(WHITE); doc.text(qr.product, M+6, y+8);
 
-  let tHead, tBody;
+  const tags=[]; if(qr.plan) tags.push(`Plan: ${qr.plan}`);
+  tags.push(qr.siLabel, qr.zoneLabel, qr.mode||'Annual', `Term: ${qr.term} Yr${qr.term>1?'s':''}`);
+  let px=W-M-4; bf(8,'normal'); txt(MBLUE);
+  [...tags].reverse().forEach(t=>{ doc.text(t,px,y+8,{align:'right'}); px-=doc.getTextWidth(t)+7; });
+
+  bf(8,'normal'); txt([165,199,255]);
+  const covStr=qr.coverage==='floater'?'Family Floater':'Individual Coverage';
+  doc.text(covStr, M+6, y+16);
+
+  y += 26;
+
+  // ─────────────────────────────────────────────────────
+  // 4. BUILD TABLE ROWS + ROW TYPE METADATA
+  // ─────────────────────────────────────────────────────
+  const rows=[], rt=[];  // rt = row type
+
   if (qr.plan) {
-    tHead = [['Member','Age','Base (₹)','HP Adj.','Premium (₹)']];
-    tBody = qr.memberRows.map(r=>[
-      r.name, String(r.age),
-      Math.round(r.base).toLocaleString('en-IN'),
-      r.hpNet?(r.hpNet>0?'+':'')+r.hpNet+'%':'—',
-      Math.round(r.afterHP).toLocaleString('en-IN')
-    ]);
-    tBody.push(['','','','Sub-total',Math.round(qr.subtotal).toLocaleString('en-IN')]);
-    if (qr.floaterDisc) tBody.push(['','','',`Floater Disc. −${qr.floaterDisc*100}%`,'−'+Math.round(qr.subtotal*qr.floaterDisc).toLocaleString('en-IN')]);
-    if (qr.loyalty) tBody.push(['','','','Loyalty Disc. −2.5%','−'+Math.round(qr.afterFloater*0.025).toLocaleString('en-IN')]);
-    if (qr.termDisc) tBody.push(['','','',`Long-Term Disc. −${qr.termDisc*100}%`,'−'+Math.round(qr.afterLoyalty*qr.termDisc).toLocaleString('en-IN')]);
-    if (qr.maternity) tBody.push(['','','',`Maternity Cover (${qr.matLabel})`,Math.round(qr.matPrem).toLocaleString('en-IN')]);
-    tBody.push(['','','',`TOTAL ${(qr.mode||'').toUpperCase()} PREMIUM`,Math.round(qr.grandTotal).toLocaleString('en-IN')]);
+    // ── Yuva Bharat ──
+    qr.memberRows.forEach((r,i)=>{
+      rows.push([`Member ${i+1}:  ${r.name||'Member'}  (Age ${r.age})`, '']);
+      rt.push('mhdr');
+
+      rows.push(['    Base Premium', `Rs.${Math.round(r.base).toLocaleString('en-IN')}`]);
+      rt.push('base');
+
+      (r.hpDiscounts||[]).forEach(d=>{
+        const amt = Math.abs(Math.round(r.base * d.pct/100));
+        const sign = d.pct < 0 ? '- ' : '+ ';
+        rows.push([`    ${d.pct<0?'[D]':'[L]'} ${d.label}  (${d.pct>0?'+':''}${d.pct}%)`, `${sign}Rs.${amt.toLocaleString('en-IN')}`]);
+        rt.push(d.pct<0?'hpd':'hpl');
+      });
+
+      if((r.hpDiscounts||[]).length){
+        rows.push(['    Net Member Premium', `Rs.${Math.round(r.afterHP).toLocaleString('en-IN')}`]);
+        rt.push('mnet');
+      }
+    });
+
+    if(qr.memberRows.length>1 || qr.floaterDisc || qr.loyalty || qr.termDisc){
+      rows.push(['Sub-total  (sum of all member premiums)', `Rs.${Math.round(qr.subtotal).toLocaleString('en-IN')}`]);
+      rt.push('sub');
+    }
+    if(qr.floaterDisc){
+      const n=qr.mems.length, p=qr.floaterDisc*100;
+      rows.push([`Family Floater Discount  —  ${n} Members  (-${p}%)`, `- Rs.${Math.round(qr.subtotal*qr.floaterDisc).toLocaleString('en-IN')}`]);
+      rt.push('disc');
+    }
+    if(qr.loyalty){
+      rows.push([`Loyalty Discount  (-2.5%)  —  Existing NIA Policy >= Rs.5,000`, `- Rs.${Math.round(qr.afterFloater*0.025).toLocaleString('en-IN')}`]);
+      rt.push('disc');
+    }
+    if(qr.termDisc){
+      rows.push([`Long-Term Policy Discount  —  ${qr.term} Years  (-${qr.termDisc*100}%)`, `- Rs.${Math.round(qr.afterLoyalty*qr.termDisc).toLocaleString('en-IN')}`]);
+      rt.push('disc');
+    }
+    if(qr.maternity){
+      rows.push([`Optional Cover: Enhanced Maternity  (${qr.matLabel})`, `Rs.${Math.round(qr.matPrem).toLocaleString('en-IN')}`]);
+      rt.push('opt');
+    }
+    rows.push([`TOTAL  ${(qr.mode||'').toUpperCase()}  PREMIUM`, `Rs.${Math.round(qr.grandTotal).toLocaleString('en-IN')}`]);
+    rt.push('total');
+
   } else {
-    const hc = qr.cataract;
-    tHead = hc ? [['Member','Age','Base (₹)','Cataract (₹)','Total (₹)']] : [['Member','Age','Annual Premium (₹)']];
-    tBody = qr.memberRows.map(r => hc
-      ? [r.name,String(r.age),Math.round(r.base).toLocaleString('en-IN'),Math.round(r.catPrem).toLocaleString('en-IN'),Math.round(r.base+r.catPrem).toLocaleString('en-IN')]
-      : [r.name,String(r.age),Math.round(r.base).toLocaleString('en-IN')]);
-    const cc = hc?4:2;
-    tBody.push([...Array(cc-1).fill(''),'Sub-total',Math.round(qr.combined).toLocaleString('en-IN')]);
-    if (qr.floaterDisc) tBody.push([...Array(cc-1).fill(''),`Floater Disc. −${qr.floaterDisc*100}%`,'−'+Math.round(qr.combined*qr.floaterDisc).toLocaleString('en-IN')]);
-    if (qr.termDisc) tBody.push([...Array(cc-1).fill(''),`Long-Term Disc. −${qr.termDisc*100}%`,'−'+Math.round(qr.afterFloater*qr.termDisc).toLocaleString('en-IN')]);
-    tBody.push([...Array(cc-1).fill(''),'TOTAL ANNUAL PREMIUM',Math.round(qr.afterTerm).toLocaleString('en-IN')]);
+    // ── NI Floater ──
+    qr.memberRows.forEach((r,i)=>{
+      rows.push([`Member ${i+1}:  ${r.name||'Member'}  (Age ${r.age})`, '']);
+      rt.push('mhdr');
+      rows.push(['    Annual Base Premium', `Rs.${Math.round(r.base).toLocaleString('en-IN')}`]);
+      rt.push('base');
+      if(qr.cataract && r.catPrem){
+        rows.push(['    Optional: Cataract Cover (Revised Limit)', `Rs.${Math.round(r.catPrem).toLocaleString('en-IN')}`]);
+        rt.push('opt');
+        rows.push(['    Member Total', `Rs.${Math.round(r.base+r.catPrem).toLocaleString('en-IN')}`]);
+        rt.push('mnet');
+      }
+    });
+    rows.push(['Sub-total  (sum of all member premiums)', `Rs.${Math.round(qr.combined).toLocaleString('en-IN')}`]);
+    rt.push('sub');
+    if(qr.floaterDisc){
+      const n=qr.mems.length, p=qr.floaterDisc*100;
+      rows.push([`Family Floater Discount  —  ${n} Members  (-${p}%)`, `- Rs.${Math.round(qr.combined*qr.floaterDisc).toLocaleString('en-IN')}`]);
+      rt.push('disc');
+    }
+    if(qr.termDisc){
+      rows.push([`Long-Term Policy Discount  —  ${qr.term} Years  (-${qr.termDisc*100}%)`, `- Rs.${Math.round(qr.afterFloater*qr.termDisc).toLocaleString('en-IN')}`]);
+      rt.push('disc');
+    }
+    rows.push(['TOTAL  ANNUAL  PREMIUM', `Rs.${Math.round(qr.afterTerm).toLocaleString('en-IN')}`]);
+    rt.push('total');
   }
 
-  const lastIdx = tBody.length-1;
+  // ─────────────────────────────────────────────────────
+  // 5. SECTION HEADING
+  // ─────────────────────────────────────────────────────
+  bf(8.5,'bold'); txt(NAVY);
+  doc.text('PREMIUM BREAKDOWN', M, y);
+  // underline
+  drw(TEAL); doc.setLineWidth(0.7);
+  doc.line(M, y+2, M+TW, y+2);
+  doc.setLineWidth(0.2);
+  y += 7;
+
+  // ─────────────────────────────────────────────────────
+  // 6. AUTO TABLE
+  // ─────────────────────────────────────────────────────
+  const totalIdx = rt.lastIndexOf('total');
+
   doc.autoTable({
-    head: tHead, body: tBody,
-    startY: y, margin:{left:M,right:M},
-    tableWidth: W-2*M,
-    headStyles:{fillColor:[15,34,64],textColor:255,fontSize:8,fontStyle:'bold',cellPadding:5},
-    bodyStyles:{fontSize:8.5,cellPadding:4.5},
-    alternateRowStyles:{fillColor:[248,251,255]},
-    columnStyles: tHead[0].length===5
-      ? {0:{cellWidth:42},1:{cellWidth:16,halign:'center'},2:{cellWidth:32,halign:'right'},3:{cellWidth:28,halign:'center'},4:{cellWidth:38,halign:'right'}}
-      : tHead[0].length===3
-        ? {0:{cellWidth:50},1:{cellWidth:20,halign:'center'},2:{cellWidth:70,halign:'right'}}
-        : {0:{cellWidth:40},1:{cellWidth:16,halign:'center'},2:{cellWidth:30,halign:'right'},3:{cellWidth:28,halign:'right'},4:{cellWidth:30,halign:'right'}},
-    didParseCell(data) {
-      if (data.section==='body' && data.row.index===lastIdx) {
-        data.cell.styles.fillColor=[15,34,64];
-        data.cell.styles.textColor=[255,215,0];
-        data.cell.styles.fontStyle='bold';
-        data.cell.styles.fontSize=9.5;
-      }
-      // sub-total & discount rows
-      const row = tBody[data.row.index];
-      if (data.section==='body' && row && row[0]==='' && data.row.index<lastIdx) {
-        const label = row[row.length-2]||'';
-        if (label==='Sub-total') { data.cell.styles.fontStyle='bold'; data.cell.styles.fillColor=[235,240,250]; }
-        else if (label.includes('Disc')) { data.cell.styles.textColor=[5,100,70]; data.cell.styles.fillColor=[240,253,244]; }
+    body: rows,
+    startY: y, margin:{left:M,right:M}, tableWidth:TW,
+    styles:{fontSize:9, cellPadding:{top:4.5,bottom:4.5,left:6,right:6}, lineColor:MGRAY, lineWidth:0.25, valign:'middle'},
+    columnStyles:{
+      0:{cellWidth:TW*0.67},
+      1:{cellWidth:TW*0.33, halign:'right', fontStyle:'bold'}
+    },
+    didParseCell(data){
+      const type = rt[data.row.index];
+      const isAmt = data.column.index===1;
+      switch(type){
+        case 'mhdr':
+          data.cell.styles.fillColor = MBLUE;
+          data.cell.styles.textColor = DBLUE;
+          data.cell.styles.fontStyle = 'bold';
+          data.cell.styles.fontSize  = 9.5;
+          data.cell.styles.cellPadding = {top:5,bottom:5,left:6,right:6};
+          break;
+        case 'base':
+          data.cell.styles.fillColor = WHITE;
+          data.cell.styles.textColor = isAmt ? NAVY : [71,85,105];
+          break;
+        case 'hpd':
+          data.cell.styles.fillColor = LGREEN;
+          data.cell.styles.textColor = DGREEN;
+          data.cell.styles.fontSize  = 8.5;
+          break;
+        case 'hpl':
+          data.cell.styles.fillColor = LRED;
+          data.cell.styles.textColor = RED;
+          data.cell.styles.fontSize  = 8.5;
+          break;
+        case 'mnet':
+          data.cell.styles.fillColor = [241,245,249];
+          data.cell.styles.textColor = NAVY;
+          data.cell.styles.fontStyle = 'bold';
+          data.cell.styles.fontSize  = 9;
+          break;
+        case 'sub':
+          data.cell.styles.fillColor = [235,240,250];
+          data.cell.styles.textColor = NAVY;
+          data.cell.styles.fontStyle = 'bold';
+          data.cell.styles.lineColor = [148,163,184];
+          break;
+        case 'disc':
+          data.cell.styles.fillColor = LGREEN;
+          data.cell.styles.textColor = DGREEN;
+          data.cell.styles.fontStyle = isAmt?'bold':'normal';
+          break;
+        case 'opt':
+          data.cell.styles.fillColor = LGOLD;
+          data.cell.styles.textColor = DGOLD;
+          data.cell.styles.fontStyle = isAmt?'bold':'normal';
+          break;
+        case 'total':
+          data.cell.styles.fillColor = NAVY;
+          data.cell.styles.textColor = GOLD;
+          data.cell.styles.fontStyle = 'bold';
+          data.cell.styles.fontSize  = 12;
+          data.cell.styles.cellPadding = {top:7,bottom:7,left:6,right:6};
+          break;
       }
     }
   });
 
-  y = doc.lastAutoTable.finalY + 8;
+  y = doc.lastAutoTable.finalY + 10;
 
-  // ── FOOTER ──
-  const pH = doc.internal.pageSize.height;
-  doc.setFillColor(15,34,64);
-  doc.rect(0,pH-12,W,12,'F');
-  doc.setFillColor(37,99,168);
-  doc.rect(0,pH-13,W,1,'F');
-  doc.setTextColor(150,180,220); doc.setFont('helvetica','normal'); doc.setFontSize(7);
-  doc.text('This is a computer-generated premium quotation. Subject to policy terms & conditions.', W/2, pH-7, {align:'center'});
-  doc.text(`Generated by: ${agent}  ·  ${today}`, W/2, pH-3, {align:'center'});
+  // ─────────────────────────────────────────────────────
+  // 7. NOTES
+  // ─────────────────────────────────────────────────────
+  const pH2 = doc.internal.pageSize.height;
+  if(y+28 > pH2-18){ doc.addPage(); y=16; }
+
+  const notes=['• GST: Nil — effective 22nd September 2025.',
+    '• [D] = Discount applied  |  [L] = Loading applied on base premium for that member.',
+    '• Health parameter adjustments apply only to members aged 18 years and above (Yuva Bharat).',
+    '• This is an indicative quotation. Final premium is subject to insurer underwriting & policy issuance.'];
+  if(qr.zoneLabel&&qr.zoneLabel.includes('Zone 2')&&!qr.plan)
+    notes.splice(0,0,'• Co-payment: 20% applies if Zone 2 insured members avail treatment at Zone 1 (Maharashtra/Gujarat) hospitals.');
+
+  bf(7.5,'normal'); txt(DGRAY);
+  notes.forEach(n=>{ doc.text(n,M,y); y+=4.8; });
+
+  // ─────────────────────────────────────────────────────
+  // 8. FOOTER
+  // ─────────────────────────────────────────────────────
+  const fH = doc.internal.pageSize.height;
+  fill(NAVY);  doc.rect(0,fH-15,W,15,'F');
+  fill(TEAL);  doc.rect(0,fH-16,W,1,'F');
+  fill(GOLD);  doc.rect(0,fH-15,5,15,'F');
+  bf(7,'normal'); txt([148,163,184]);
+  doc.text('This is a computer-generated premium quotation. Subject to policy terms & conditions.', W/2, fH-9, {align:'center'});
+  bf(7.5,'bold'); txt(GOLD);
+  doc.text(`Generated by: ${agent}${agentCode?' ['+agentCode+']':''}  ·  ${today}`, W/2, fH-4, {align:'center'});
 
   doc.save(`Quote_${custName.replace(/\s+/g,'_')}_${today.replace(/\s/g,'')}.pdf`);
 }
