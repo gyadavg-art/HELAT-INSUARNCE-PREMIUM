@@ -75,8 +75,7 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:14px 0}
 <header>
   <div class="logo">NIA</div>
   <div>
-    <h1>Insurance Premium Calculator</h1>
-    <p>New India Assurance Co. Ltd. · GST: Nil w.e.f. 22 Sept 2025</p>
+    <h1>UP38- संभल (स्वास्थ्य -बीमा प्रीमियम )</h1>
   </div>
 </header>
 
@@ -928,12 +927,7 @@ function calculateYB(mems) {
   document.getElementById('quoteHeader').innerHTML =
     `<b>Product:</b> Yuva Bharat Health Policy &nbsp;|&nbsp; <b>Plan:</b> ${plan} &nbsp;|&nbsp; <b>Zone:</b> ${quoteResult.zoneLabel} &nbsp;|&nbsp; <b>SI:</b> ${YB_SI_LABELS[siIdx]} &nbsp;|&nbsp; <b>Coverage:</b> ${coverage==='floater'?'Family Floater':'Individual'} &nbsp;|&nbsp; <b>Mode:</b> ${modeLabel} &nbsp;|&nbsp; <b>Term:</b> ${term} Year${term>1?'s':''} &nbsp;|&nbsp; <b>GST:</b> Nil`;
 
-  const notes = document.getElementById('quoteNotes');
-  notes.innerHTML = `<div class="note-box"><strong>Important Notes</strong>
-    GST: Nil effective 22nd September 2025 &nbsp;·&nbsp; UIN: NIAHLIP25059V042425 &nbsp;·&nbsp; Premium is excluding GST.<br>
-    ${coverage==='floater'?`Floater policy: All members share the Sum Insured of ${YB_SI_LABELS[siIdx]}.`:`Individual policy: Each member has independent Sum Insured of ${YB_SI_LABELS[siIdx]}.`}<br>
-    Health parameter discounts/loadings apply only to members aged 18 years and above.
-  </div>`;
+  document.getElementById('quoteNotes').innerHTML = '';
 }
 
 function calculateNIF(mems) {
@@ -984,12 +978,7 @@ function calculateNIF(mems) {
   document.getElementById('quoteHeader').innerHTML =
     `<b>Product:</b> NI Floater Mediclaim Policy &nbsp;|&nbsp; <b>Zone:</b> ${quoteResult.zoneLabel} &nbsp;|&nbsp; <b>SI:</b> ${NIF_SI_LABELS[siIdx]} &nbsp;|&nbsp; <b>Coverage:</b> Family Floater &nbsp;|&nbsp; <b>Mode:</b> Annual &nbsp;|&nbsp; <b>Term:</b> ${term} Year${term>1?'s':''} &nbsp;|&nbsp; <b>GST:</b> Nil`;
 
-  const notes = document.getElementById('quoteNotes');
-  notes.innerHTML = `<div class="note-box"><strong>Important Notes</strong>
-    GST: Nil effective 22nd September 2025 &nbsp;·&nbsp; UIN: NIAHLIP25039V092425 &nbsp;·&nbsp; Premium is excluding GST.<br>
-    ${zone==='z2'?'<strong>Co-payment:</strong> 20% co-payment applies if Zone 2 insured members avail treatment at Zone 1 (Maharashtra/Gujarat) hospitals.<br>':''}
-    Floater policy: All members share the Sum Insured of ${NIF_SI_LABELS[siIdx]}. Premium is per member and aggregated.
-  </div>`;
+  document.getElementById('quoteNotes').innerHTML = '';
 }
 
 function resetForm() {
