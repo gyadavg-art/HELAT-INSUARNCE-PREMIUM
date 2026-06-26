@@ -1229,10 +1229,10 @@ function generatePDF() {
 
   // ── palette ───────────────────────────────────────────
   const NAVY   = [12, 20, 48];
-  const SDARK  = [14, 22, 52];      // sidebar bg
-  const SLINE  = [34, 52, 95];      // sidebar divider
-  const SLAB   = [110,140,180];     // sidebar label colour
-  const SSUB   = [155,180,215];     // sidebar subtitle
+  const SDARK  = [28, 52, 110];     // sidebar bg
+  const SLINE  = [55, 88, 155];     // sidebar divider
+  const SLAB   = [145,175,220];     // sidebar label colour
+  const SSUB   = [180,205,240];     // sidebar subtitle
   const ORANGE = [215, 82, 12];     // main accent
   const LORANGE= [255,245,230];     // notes bg
   const BORNG  = [235,175,105];     // notes border
@@ -1446,7 +1446,7 @@ function generatePDF() {
     startY: y, margin:{left:RX, right:REM}, tableWidth:RW,
     styles:{fontSize:8.5, cellPadding:{top:4.5,bottom:4.5,left:6,right:6},
             lineColor:MGRAY, lineWidth:0.2, valign:'middle', overflow:'linebreak'},
-    headStyles:{fillColor:NAVY, textColor:WHITE, fontStyle:'bold', fontSize:8,
+    headStyles:{fillColor:[35,75,160], textColor:WHITE, fontStyle:'bold', fontSize:8,
                 cellPadding:{top:4,bottom:4,left:6,right:6}},
     columnStyles: mCS,
     didParseCell(d) {
