@@ -896,6 +896,28 @@ function setMF(id, field, value) {
   if (m) m[field] = value;
 }
 
+function onAgeInput(id, val) {
+  const age = parseInt(val) || 0;
+  const p = getProduct();
+  // Age restriction warning
+  const warn = document.getElementById(`m${id}_agewarn`);
+  if (warn) {
+    if (p === 'yb' && age > 65)
+      warn.textContent = '⚠ Max entry age for Yuva Bharat is 65 years';
+    else if (p === 'nif' && age > 100)
+      warn.textContent = '⚠ Age above 100 may not be covered';
+    else
+      warn.textContent = '';
+  }
+  // Disable HP section for under-18
+  const hp = document.getElementById(`m${id}_hp`);
+  if (hp) {
+    const under18 = val !== '' && age < 18;
+    hp.style.opacity = under18 ? '0.45' : '1';
+    hp.style.pointerEvents = under18 ? 'none' : '';
+  }
+}
+
 // Fallback DOM read — called before any re-render and before calculate
 function syncMembersFromDOM() {
   members.forEach(m => {
@@ -948,9 +970,12 @@ function renderMembers() {
       </div>
       <div class="form-grid">
         <div class="form-group"><span class="form-label">Name / Relation</span><input type="text" id="m${m.id}_name" value="${m.name||''}" placeholder="e.g. Self, Spouse, Son" oninput="setMF(${m.id},'name',this.value)"></div>
-        <div class="form-group"><span class="form-label">Age (years)</span><input type="number" id="m${m.id}_age" value="${m.age||''}" min="0" max="120" placeholder="Age in years" oninput="setMF(${m.id},'age',this.value)"></div>
+        <div class="form-group"><span class="form-label">Age (years)</span>
+          <input type="number" id="m${m.id}_age" value="${m.age||''}" min="0" max="120" placeholder="Age in years" oninput="setMF(${m.id},'age',this.value);onAgeInput(${m.id},this.value)">
+          <span id="m${m.id}_agewarn" style="font-size:11px;color:#dc2626;margin-top:3px;display:block"></span>
+        </div>
       </div>
-      ${showHP ? `<div style="background:rgba(37,99,168,.06);border-radius:8px;padding:10px 12px;margin-top:4px">
+      ${showHP ? `<div id="m${m.id}_hp" style="background:rgba(37,99,168,.06);border-radius:8px;padding:10px 12px;margin-top:4px;${parseInt(m.age||0)<18&&m.age!==''?'opacity:.45;pointer-events:none':''}">
         <div style="font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Health Parameters (18+ only · affects discount / loading)</div>
         <div class="form-grid" style="grid-template-columns:repeat(auto-fit,minmax(165px,1fr))">
           <div class="form-group"><span class="form-label">BMI</span>
@@ -1213,22 +1238,20 @@ function generatePDF() {
   const bf   = (sz,st='bold') => { doc.setFont('helvetica',st); doc.setFontSize(sz); };
 
   // ─────────────────────────────────────────────────────
-  // 1. HEADER  (0 – 32mm)
+  // 1. HEADER
   // ─────────────────────────────────────────────────────
-  fill(NAVY); doc.rect(0,0,W,32,'F');
-  fill(GOLD);  doc.rect(0,0,5,32,'F');           // gold left bar
-  fill(TEAL);  doc.rect(0,30,W,2,'F');           // teal bottom stripe
+  fill(NAVY); doc.rect(0,0,W,30,'F');
+  fill(GOLD);  doc.rect(0,0,5,30,'F');
+  fill(TEAL);  doc.rect(0,28,W,2,'F');
 
-  bf(19); txt(WHITE);
-  doc.text('UP38 - Sambhal', M+7, 13);
-  bf(8.5,'normal'); txt([148,163,184]);
-  doc.text('Health Insurance Premium Quotation  |  स्वास्थ्य बीमा प्रीमियम', M+7, 20);
-  bf(8); txt(GOLD);
-  doc.text('GST: NIL  w.e.f. 22 Sept 2025', W-M, 13, {align:'right'});
+  bf(15); txt(WHITE);
+  doc.text('New India Assurance', M+7, 11);
+  bf(9,'normal'); txt(GOLD);
+  doc.text('Health Insurance Quotation', M+7, 18);
   bf(7.5,'normal'); txt([148,163,184]);
-  doc.text(`Date: ${today}`, W-M, 20, {align:'right'});
+  doc.text(`Date: ${today}   |   GST: NIL`, W-M, 13, {align:'right'});
 
-  let y = 38;
+  let y = 36;
 
   // ─────────────────────────────────────────────────────
   // 2. AGENT / CUSTOMER / DATE  (3-col box)
@@ -1252,179 +1275,205 @@ function generatePDF() {
   y += bH + 7;
 
   // ─────────────────────────────────────────────────────
-  // 3. PRODUCT BANNER
+  // 3. PRODUCT DETAILS BOX
   // ─────────────────────────────────────────────────────
-  fill(BLUE); doc.roundedRect(M,y,TW,20,3,3,'F');
-  bf(11); txt(WHITE); doc.text(qr.product, M+6, y+8);
+  // Dark header strip with product name
+  fill(BLUE); doc.roundedRect(M,y,TW,11,2,2,'F');
+  bf(10.5); txt(WHITE);
+  doc.text(qr.product, M+6, y+7.5);
+  if(qr.plan){ bf(9,'normal'); txt(GOLD); doc.text(`Plan: ${qr.plan}`, W-M-4, y+7.5, {align:'right'}); }
 
-  const tags=[]; if(qr.plan) tags.push(`Plan: ${qr.plan}`);
-  tags.push(qr.siLabel, qr.zoneLabel, qr.mode||'Annual', `Term: ${qr.term} Yr${qr.term>1?'s':''}`);
-  let px=W-M-4; bf(8,'normal'); txt(MBLUE);
-  [...tags].reverse().forEach(t=>{ doc.text(t,px,y+8,{align:'right'}); px-=doc.getTextWidth(t)+7; });
+  y += 11;
 
-  bf(8,'normal'); txt([165,199,255]);
-  const covStr=qr.coverage==='floater'?'Family Floater':'Individual Coverage';
-  doc.text(covStr, M+6, y+16);
+  // Light details grid below
+  fill([236,244,255]); drw([200,215,240]); doc.roundedRect(M,y,TW,18,0,0,'FD');
+  const details = [];
+  details.push(['Sum Insured', qr.siLabel||'—']);
+  details.push(['Zone', qr.zoneLabel||'—']);
+  details.push(['Coverage', qr.coverage==='floater'?'Family Floater':'Individual']);
+  if(qr.plan){ details.push(['Payment Mode', qr.mode||'Annual']); details.push(['Policy Term', `${qr.term} Year${qr.term>1?'s':''}`]); }
+  else { details.push(['Payment Mode', 'Annual']); details.push(['Policy Term', `${qr.term} Year${qr.term>1?'s':''}`]); }
 
-  y += 26;
+  const cols = details.length;
+  const cw = TW / cols;
+  details.forEach(([lbl,val],i) => {
+    const cx = M + i*cw + 4;
+    bf(6.5,'bold'); txt(DGRAY); doc.text(lbl.toUpperCase(), cx, y+6);
+    bf(8.5,'bold'); txt(NAVY);  doc.text(val, cx, y+14);
+  });
+
+  y += 24;
 
   // ─────────────────────────────────────────────────────
   // 4. BUILD TABLE ROWS + ROW TYPE METADATA
   // ─────────────────────────────────────────────────────
-  const rows=[], rt=[];  // rt = row type
+  // row types: mhdr | base | hpd | hpl | mnet | gap | sub | disc | opt | total
+  const rows=[], rt=[];
+
+  const addRow = (label, val, type) => { rows.push([label, val]); rt.push(type); };
 
   if (qr.plan) {
     // ── Yuva Bharat ──
     qr.memberRows.forEach((r,i)=>{
-      rows.push([`Member ${i+1}:  ${r.name||'Member'}  (Age ${r.age})`, '']);
-      rt.push('mhdr');
-
-      rows.push(['    Base Premium', `Rs.${Math.round(r.base).toLocaleString('en-IN')}`]);
-      rt.push('base');
+      if(i>0){ addRow('', '', 'gap'); }  // thin spacer between members
+      addRow(`${r.name||'Member '+(i+1)}`, `Age: ${r.age}`, 'mhdr');
+      addRow('Base Premium', `₹${Math.round(r.base).toLocaleString('en-IN')}`, 'base');
 
       (r.hpDiscounts||[]).forEach(d=>{
         const amt = Math.abs(Math.round(r.base * d.pct/100));
-        const sign = d.pct < 0 ? '- ' : '+ ';
-        rows.push([`    ${d.pct<0?'[D]':'[L]'} ${d.label}  (${d.pct>0?'+':''}${d.pct}%)`, `${sign}Rs.${amt.toLocaleString('en-IN')}`]);
-        rt.push(d.pct<0?'hpd':'hpl');
+        const sign = d.pct < 0 ? '−' : '+';
+        const prefix = d.pct < 0 ? '↓ ' : '↑ ';
+        addRow(`${prefix}${d.label}  (${d.pct>0?'+':''}${d.pct}%)`,
+               `${sign} ₹${amt.toLocaleString('en-IN')}`, d.pct<0?'hpd':'hpl');
       });
 
       if((r.hpDiscounts||[]).length){
-        rows.push(['    Net Member Premium', `Rs.${Math.round(r.afterHP).toLocaleString('en-IN')}`]);
-        rt.push('mnet');
+        addRow('Net Member Premium', `₹${Math.round(r.afterHP).toLocaleString('en-IN')}`, 'mnet');
       }
     });
 
     if(qr.memberRows.length>1 || qr.floaterDisc || qr.loyalty || qr.termDisc){
-      rows.push(['Sub-total  (sum of all member premiums)', `Rs.${Math.round(qr.subtotal).toLocaleString('en-IN')}`]);
-      rt.push('sub');
+      addRow(['',''], '', 'gap');
+      addRow('Sub-total  (All Members)', `₹${Math.round(qr.subtotal).toLocaleString('en-IN')}`, 'sub');
     }
     if(qr.floaterDisc){
       const n=qr.mems.length, p=qr.floaterDisc*100;
-      rows.push([`Family Floater Discount  —  ${n} Members  (-${p}%)`, `- Rs.${Math.round(qr.subtotal*qr.floaterDisc).toLocaleString('en-IN')}`]);
-      rt.push('disc');
+      addRow(`↓ Family Floater Discount — ${n} Members  (−${p}%)`,
+             `− ₹${Math.round(qr.subtotal*qr.floaterDisc).toLocaleString('en-IN')}`, 'disc');
     }
     if(qr.loyalty){
-      rows.push([`Loyalty Discount  (-2.5%)  —  Existing NIA Policy >= Rs.5,000`, `- Rs.${Math.round(qr.afterFloater*0.025).toLocaleString('en-IN')}`]);
-      rt.push('disc');
+      addRow('↓ Loyalty Discount (−2.5%)  —  Existing NIA Policy ≥ ₹5,000',
+             `− ₹${Math.round(qr.afterFloater*0.025).toLocaleString('en-IN')}`, 'disc');
     }
     if(qr.termDisc){
-      rows.push([`Long-Term Policy Discount  —  ${qr.term} Years  (-${qr.termDisc*100}%)`, `- Rs.${Math.round(qr.afterLoyalty*qr.termDisc).toLocaleString('en-IN')}`]);
-      rt.push('disc');
+      addRow(`↓ Long-Term Discount — ${qr.term} Years  (−${qr.termDisc*100}%)`,
+             `− ₹${Math.round(qr.afterLoyalty*qr.termDisc).toLocaleString('en-IN')}`, 'disc');
     }
     if(qr.maternity){
-      rows.push([`Optional Cover: Enhanced Maternity  (${qr.matLabel})`, `Rs.${Math.round(qr.matPrem).toLocaleString('en-IN')}`]);
-      rt.push('opt');
+      addRow(`★ Optional: Enhanced Maternity  (${qr.matLabel})`,
+             `₹${Math.round(qr.matPrem).toLocaleString('en-IN')}`, 'opt');
     }
-    rows.push([`TOTAL  ${(qr.mode||'').toUpperCase()}  PREMIUM`, `Rs.${Math.round(qr.grandTotal).toLocaleString('en-IN')}`]);
-    rt.push('total');
+    addRow(`TOTAL ${(qr.mode||'').toUpperCase()} PREMIUM`,
+           `₹${Math.round(qr.grandTotal).toLocaleString('en-IN')}`, 'total');
 
   } else {
     // ── NI Floater ──
     qr.memberRows.forEach((r,i)=>{
-      rows.push([`Member ${i+1}:  ${r.name||'Member'}  (Age ${r.age})`, '']);
-      rt.push('mhdr');
-      rows.push(['    Annual Base Premium', `Rs.${Math.round(r.base).toLocaleString('en-IN')}`]);
-      rt.push('base');
+      if(i>0){ addRow('', '', 'gap'); }
+      addRow(`${r.name||'Member '+(i+1)}`, `Age: ${r.age}`, 'mhdr');
+      addRow('Annual Base Premium', `₹${Math.round(r.base).toLocaleString('en-IN')}`, 'base');
       if(qr.cataract && r.catPrem){
-        rows.push(['    Optional: Cataract Cover (Revised Limit)', `Rs.${Math.round(r.catPrem).toLocaleString('en-IN')}`]);
-        rt.push('opt');
-        rows.push(['    Member Total', `Rs.${Math.round(r.base+r.catPrem).toLocaleString('en-IN')}`]);
-        rt.push('mnet');
+        addRow('★ Optional: Cataract Cover (Revised Limit)',
+               `₹${Math.round(r.catPrem).toLocaleString('en-IN')}`, 'opt');
+        addRow('Member Sub-total',
+               `₹${Math.round(r.base+r.catPrem).toLocaleString('en-IN')}`, 'mnet');
       }
     });
-    rows.push(['Sub-total  (sum of all member premiums)', `Rs.${Math.round(qr.combined).toLocaleString('en-IN')}`]);
-    rt.push('sub');
+    addRow('', '', 'gap');
+    addRow('Sub-total  (All Members)', `₹${Math.round(qr.combined).toLocaleString('en-IN')}`, 'sub');
     if(qr.floaterDisc){
       const n=qr.mems.length, p=qr.floaterDisc*100;
-      rows.push([`Family Floater Discount  —  ${n} Members  (-${p}%)`, `- Rs.${Math.round(qr.combined*qr.floaterDisc).toLocaleString('en-IN')}`]);
-      rt.push('disc');
+      addRow(`↓ Family Floater Discount — ${n} Members  (−${p}%)`,
+             `− ₹${Math.round(qr.combined*qr.floaterDisc).toLocaleString('en-IN')}`, 'disc');
     }
     if(qr.termDisc){
-      rows.push([`Long-Term Policy Discount  —  ${qr.term} Years  (-${qr.termDisc*100}%)`, `- Rs.${Math.round(qr.afterFloater*qr.termDisc).toLocaleString('en-IN')}`]);
-      rt.push('disc');
+      addRow(`↓ Long-Term Discount — ${qr.term} Years  (−${qr.termDisc*100}%)`,
+             `− ₹${Math.round(qr.afterFloater*qr.termDisc).toLocaleString('en-IN')}`, 'disc');
     }
-    rows.push(['TOTAL  ANNUAL  PREMIUM', `Rs.${Math.round(qr.afterTerm).toLocaleString('en-IN')}`]);
-    rt.push('total');
+    addRow('TOTAL ANNUAL PREMIUM', `₹${Math.round(qr.afterTerm).toLocaleString('en-IN')}`, 'total');
   }
 
   // ─────────────────────────────────────────────────────
   // 5. SECTION HEADING
   // ─────────────────────────────────────────────────────
-  bf(8.5,'bold'); txt(NAVY);
-  doc.text('PREMIUM BREAKDOWN', M, y);
-  // underline
-  drw(TEAL); doc.setLineWidth(0.7);
-  doc.line(M, y+2, M+TW, y+2);
-  doc.setLineWidth(0.2);
+  // Pill-style section label
+  fill(TEAL); doc.roundedRect(M, y-5, 52, 8, 2, 2, 'F');
+  bf(8,'bold'); txt(WHITE);
+  doc.text('PREMIUM BREAKDOWN', M+4, y);
   y += 7;
 
   // ─────────────────────────────────────────────────────
   // 6. AUTO TABLE
   // ─────────────────────────────────────────────────────
-  const totalIdx = rt.lastIndexOf('total');
-
   doc.autoTable({
     body: rows,
     startY: y, margin:{left:M,right:M}, tableWidth:TW,
-    styles:{fontSize:9, cellPadding:{top:4.5,bottom:4.5,left:6,right:6}, lineColor:MGRAY, lineWidth:0.25, valign:'middle'},
+    styles:{fontSize:9, cellPadding:{top:4,bottom:4,left:8,right:8},
+            lineColor:[220,228,240], lineWidth:0.2, valign:'middle', overflow:'linebreak'},
     columnStyles:{
-      0:{cellWidth:TW*0.67},
-      1:{cellWidth:TW*0.33, halign:'right', fontStyle:'bold'}
+      0:{cellWidth:TW*0.68},
+      1:{cellWidth:TW*0.32, halign:'right'}
     },
     didParseCell(data){
       const type = rt[data.row.index];
       const isAmt = data.column.index===1;
       switch(type){
+        case 'gap':
+          data.cell.styles.fillColor   = [240,244,250];
+          data.cell.styles.cellPadding = {top:1,bottom:1,left:0,right:0};
+          data.cell.styles.lineWidth   = 0;
+          break;
         case 'mhdr':
-          data.cell.styles.fillColor = MBLUE;
-          data.cell.styles.textColor = DBLUE;
-          data.cell.styles.fontStyle = 'bold';
-          data.cell.styles.fontSize  = 9.5;
-          data.cell.styles.cellPadding = {top:5,bottom:5,left:6,right:6};
+          data.cell.styles.fillColor   = [30,64,175];
+          data.cell.styles.textColor   = WHITE;
+          data.cell.styles.fontStyle   = 'bold';
+          data.cell.styles.fontSize    = 9.5;
+          data.cell.styles.cellPadding = {top:5.5,bottom:5.5,left:8,right:8};
+          // col 0 = name (bold), col 1 = age (right-aligned smaller)
+          if(isAmt){ data.cell.styles.fontSize=8.5; data.cell.styles.textColor=[180,200,240]; }
           break;
         case 'base':
           data.cell.styles.fillColor = WHITE;
-          data.cell.styles.textColor = isAmt ? NAVY : [71,85,105];
+          data.cell.styles.textColor = isAmt ? [15,23,42] : [55,65,81];
+          data.cell.styles.fontStyle = isAmt ? 'bold' : 'normal';
+          data.cell.styles.cellPadding = {top:4,bottom:4,left:16,right:8};
           break;
         case 'hpd':
-          data.cell.styles.fillColor = LGREEN;
-          data.cell.styles.textColor = DGREEN;
-          data.cell.styles.fontSize  = 8.5;
+          data.cell.styles.fillColor   = LGREEN;
+          data.cell.styles.textColor   = DGREEN;
+          data.cell.styles.fontSize    = 8.5;
+          data.cell.styles.fontStyle   = isAmt?'bold':'normal';
+          data.cell.styles.cellPadding = {top:3.5,bottom:3.5,left:16,right:8};
           break;
         case 'hpl':
-          data.cell.styles.fillColor = LRED;
-          data.cell.styles.textColor = RED;
-          data.cell.styles.fontSize  = 8.5;
+          data.cell.styles.fillColor   = LRED;
+          data.cell.styles.textColor   = RED;
+          data.cell.styles.fontSize    = 8.5;
+          data.cell.styles.fontStyle   = isAmt?'bold':'normal';
+          data.cell.styles.cellPadding = {top:3.5,bottom:3.5,left:16,right:8};
           break;
         case 'mnet':
-          data.cell.styles.fillColor = [241,245,249];
-          data.cell.styles.textColor = NAVY;
-          data.cell.styles.fontStyle = 'bold';
-          data.cell.styles.fontSize  = 9;
+          data.cell.styles.fillColor   = [235,242,255];
+          data.cell.styles.textColor   = [15,23,42];
+          data.cell.styles.fontStyle   = 'bold';
+          data.cell.styles.fontSize    = 9;
+          data.cell.styles.cellPadding = {top:4.5,bottom:4.5,left:16,right:8};
           break;
         case 'sub':
-          data.cell.styles.fillColor = [235,240,250];
-          data.cell.styles.textColor = NAVY;
-          data.cell.styles.fontStyle = 'bold';
-          data.cell.styles.lineColor = [148,163,184];
+          data.cell.styles.fillColor   = [215,228,252];
+          data.cell.styles.textColor   = [15,23,42];
+          data.cell.styles.fontStyle   = 'bold';
+          data.cell.styles.fontSize    = 9.5;
+          data.cell.styles.cellPadding = {top:5,bottom:5,left:8,right:8};
           break;
         case 'disc':
-          data.cell.styles.fillColor = LGREEN;
-          data.cell.styles.textColor = DGREEN;
-          data.cell.styles.fontStyle = isAmt?'bold':'normal';
+          data.cell.styles.fillColor   = LGREEN;
+          data.cell.styles.textColor   = DGREEN;
+          data.cell.styles.fontStyle   = isAmt?'bold':'normal';
+          data.cell.styles.cellPadding = {top:4,bottom:4,left:16,right:8};
           break;
         case 'opt':
-          data.cell.styles.fillColor = LGOLD;
-          data.cell.styles.textColor = DGOLD;
-          data.cell.styles.fontStyle = isAmt?'bold':'normal';
+          data.cell.styles.fillColor   = LGOLD;
+          data.cell.styles.textColor   = DGOLD;
+          data.cell.styles.fontStyle   = isAmt?'bold':'normal';
+          data.cell.styles.cellPadding = {top:4,bottom:4,left:16,right:8};
           break;
         case 'total':
-          data.cell.styles.fillColor = NAVY;
-          data.cell.styles.textColor = GOLD;
-          data.cell.styles.fontStyle = 'bold';
-          data.cell.styles.fontSize  = 12;
-          data.cell.styles.cellPadding = {top:7,bottom:7,left:6,right:6};
+          data.cell.styles.fillColor   = NAVY;
+          data.cell.styles.textColor   = GOLD;
+          data.cell.styles.fontStyle   = 'bold';
+          data.cell.styles.fontSize    = 11.5;
+          data.cell.styles.cellPadding = {top:7,bottom:7,left:8,right:8};
           break;
       }
     }
