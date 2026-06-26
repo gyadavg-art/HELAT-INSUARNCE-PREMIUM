@@ -840,7 +840,7 @@ function onProductChange() {
   const p = getProduct();
   document.getElementById('ybOptions').classList.toggle('hidden', p !== 'yb');
   document.getElementById('nifOptions').classList.toggle('hidden', p !== 'nif');
-  updateProductDesc(); updateZoneDesc(); renderMembers();
+  syncMembersFromDOM(); updateProductDesc(); updateZoneDesc(); renderMembers();
 }
 
 function getProduct() { return document.querySelector('input[name=product]:checked').value; }
@@ -852,7 +852,7 @@ function updateProductDesc() {
   else el.innerHTML = '<span class="info-pill">NI Floater</span> &nbsp;Floater only · SI ₹2L–₹15L · Annual premium · Per-year age pricing · UIN: NIAHLIP25039V092425';
 }
 
-function onZoneChange() { updateZoneDesc(); renderMembers(); }
+function onZoneChange() { syncMembersFromDOM(); updateZoneDesc(); renderMembers(); }
 
 function updateZoneDesc() {
   const z = document.getElementById('zone').value;
@@ -888,13 +888,31 @@ function onNIFSIChange() {
 // =============================================================================
 // MEMBER MANAGEMENT
 // =============================================================================
+function syncMembersFromDOM() {
+  members.forEach(m => {
+    const name  = document.getElementById(`m_${m.id}_name`);
+    const age   = document.getElementById(`m_${m.id}_age`);
+    const bmi   = document.getElementById(`m_${m.id}_bmi`);
+    const hba1c = document.getElementById(`m_${m.id}_hba1c`);
+    const bp    = document.getElementById(`m_${m.id}_bp`);
+    const noH   = document.getElementById(`m_${m.id}_nohosp`);
+    if (name)  m.name  = name.value;
+    if (age)   m.age   = age.value;
+    if (bmi)   m.bmi   = bmi.value;
+    if (hba1c) m.hba1c = hba1c.value;
+    if (bp)    m.bp    = bp.value;
+    if (noH)   m.noHosp= noH.checked;
+  });
+}
+
 function addMember() {
+  syncMembersFromDOM();
   const id = Date.now() + Math.random();
   members.push({id, age:'', name:`Member ${members.length+1}`, bmi:'normal', hba1c:'normal', bp:'normal', noHosp:false});
   renderMembers();
 }
 
-function removeMember(id) { members = members.filter(m => m.id !== id); renderMembers(); }
+function removeMember(id) { syncMembersFromDOM(); members = members.filter(m => m.id !== id); renderMembers(); }
 
 function collectMembers() {
   return members.map(m => ({
@@ -928,28 +946,28 @@ function renderMembers() {
         <div class="form-grid" style="grid-template-columns:repeat(auto-fit,minmax(165px,1fr))">
           <div class="form-group"><span class="form-label">BMI</span>
             <select id="m_${m.id}_bmi">
-              <option value="good">18.5–32 &nbsp;(−2.5%)</option>
-              <option value="normal" selected>Not specified (0%)</option>
-              <option value="high">Above 32 &nbsp;(+2.5%)</option>
+              <option value="good" ${m.bmi==='good'?'selected':''}>18.5–32 &nbsp;(−2.5%)</option>
+              <option value="normal" ${(m.bmi||'normal')==='normal'?'selected':''}>Not specified (0%)</option>
+              <option value="high" ${m.bmi==='high'?'selected':''}>Above 32 &nbsp;(+2.5%)</option>
             </select>
           </div>
           <div class="form-group"><span class="form-label">HbA1c / Diabetes</span>
             <select id="m_${m.id}_hba1c">
-              <option value="good">Non-diabetic &lt;6.4 (−2.5%)</option>
-              <option value="normal" selected>Not specified (0%)</option>
-              <option value="high">Diabetic &gt;6.4 (+2.5%)</option>
+              <option value="good" ${m.hba1c==='good'?'selected':''}>Non-diabetic &lt;6.4 (−2.5%)</option>
+              <option value="normal" ${(m.hba1c||'normal')==='normal'?'selected':''}>Not specified (0%)</option>
+              <option value="high" ${m.hba1c==='high'?'selected':''}>Diabetic &gt;6.4 (+2.5%)</option>
             </select>
           </div>
           <div class="form-group"><span class="form-label">Blood Pressure</span>
             <select id="m_${m.id}_bp">
-              <option value="good">≤120/80 &nbsp;(−2.5%)</option>
-              <option value="normal" selected>120–139/89 (0%)</option>
-              <option value="high">Above 139/89 (+2.5%)</option>
+              <option value="good" ${m.bp==='good'?'selected':''}>≤120/80 &nbsp;(−2.5%)</option>
+              <option value="normal" ${(m.bp||'normal')==='normal'?'selected':''}>120–139/89 (0%)</option>
+              <option value="high" ${m.bp==='high'?'selected':''}>Above 139/89 (+2.5%)</option>
             </select>
           </div>
           <div class="form-group" style="justify-content:flex-end">
             <label class="choice-pill" style="margin-top:18px;font-size:12px">
-              <input type="checkbox" id="m_${m.id}_nohosp"> No hosp. last 3 yrs (−2.5%)
+              <input type="checkbox" id="m_${m.id}_nohosp" ${m.noHosp?'checked':''}> No hosp. last 3 yrs (−2.5%)
             </label>
           </div>
         </div>
