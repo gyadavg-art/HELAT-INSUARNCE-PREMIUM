@@ -1207,375 +1207,316 @@ function renderCommission() {
 }
 
 // =============================================================================
-// PDF GENERATION
+// PDF GENERATION  — single-page optimised layout
 // =============================================================================
 function generatePDF() {
   if (!quoteResult) { alert('Please calculate premium first.'); return; }
   if (typeof window.jspdf === 'undefined') { alert('PDF library not loaded. Check internet connection.'); return; }
   const {jsPDF} = window.jspdf;
-  const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  const W=210, M=13, TW=210-2*13;
+  const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+  const W=210, M=12, TW=210-2*12;
 
-  const agent      = document.getElementById('agentName').value.trim()    || 'Agent';
+  const agent      = document.getElementById('agentName').value.trim()  || 'Agent';
   const agentCode  = document.getElementById('agentCode').value.trim();
-  const custName   = document.getElementById('custName').value.trim()     || 'Customer';
+  const custName   = document.getElementById('custName').value.trim()   || 'Customer';
   const custContact= document.getElementById('custContact').value.trim();
   const today      = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
   const qr         = quoteResult;
 
-  // ── palette ──
-  const NAVY =[15,23,42], BLUE=[30,64,175], LBLUE=[59,130,246], TEAL=[8,145,178];
-  const GREEN=[5,150,105], LGREEN=[209,250,229], DGREEN=[6,95,70];
+  // ── palette ──────────────────────────────────────────
+  const NAVY =[15,23,42],  BLUE=[30,64,175],  TEAL=[8,145,178];
+  const GREEN=[5,150,105], LGREEN=[220,252,231], DGREEN=[6,95,70];
   const RED  =[185,28,28], LRED=[254,226,226];
-  const GOLD =[245,158,11], LGOLD=[254,243,199], DGOLD=[146,64,14];
-  const WHITE=[255,255,255], LGRAY=[248,250,252], MGRAY=[226,232,240], DGRAY=[100,116,139];
-  const MBLUE=[219,234,254], DBLUE=[30,64,175];
+  const GOLD =[245,158,11],LGOLD=[254,243,199], DGOLD=[120,53,15];
+  const WHITE=[255,255,255],LGRAY=[247,249,252],MGRAY=[218,226,238],DGRAY=[90,106,127];
+  const MBLUE=[219,234,254];
 
-  // helper: set rgb fill/text
   const fill = c => doc.setFillColor(...c);
   const txt  = c => doc.setTextColor(...c);
   const drw  = c => doc.setDrawColor(...c);
+  const lw   = w => doc.setLineWidth(w);
   const bf   = (sz,st='bold') => { doc.setFont('helvetica',st); doc.setFontSize(sz); };
 
-  // ─────────────────────────────────────────────────────
-  // 1. HEADER
-  // ─────────────────────────────────────────────────────
-  fill(NAVY); doc.rect(0,0,W,30,'F');
-  fill(GOLD);  doc.rect(0,0,5,30,'F');
-  fill(TEAL);  doc.rect(0,28,W,2,'F');
+  // ══════════════════════════════════════════════════════
+  // 1. HEADER  (22 mm)
+  // ══════════════════════════════════════════════════════
+  fill(NAVY); doc.rect(0,0,W,22,'F');
+  fill(GOLD);  doc.rect(0,0,4,22,'F');           // gold left stripe
+  fill(TEAL);  doc.rect(0,21.2,W,0.8,'F');       // teal bottom line
 
-  bf(15); txt(WHITE);
-  doc.text('New India Assurance', M+7, 11);
-  bf(9,'normal'); txt(GOLD);
-  doc.text('Health Insurance Quotation', M+7, 18);
-  bf(7.5,'normal'); txt([148,163,184]);
-  doc.text(`Date: ${today}   |   GST: NIL`, W-M, 13, {align:'right'});
+  bf(13); txt(WHITE);
+  doc.text('New India Assurance Co. Ltd.', M+6, 9);
+  bf(8,'normal'); txt(GOLD);
+  doc.text('Health Insurance Premium Quotation', M+6, 16);
+  bf(7,'normal'); txt([160,175,195]);
+  doc.text(`Date: ${today}   GST: NIL`, W-M, 14, {align:'right'});
 
-  let y = 36;
+  let y = 26;   // ← content starts here
 
-  // ─────────────────────────────────────────────────────
-  // 2. AGENT / CUSTOMER / DATE  (3-col box)
-  // ─────────────────────────────────────────────────────
-  const bH = custContact ? 30 : 26;
-  fill(LGRAY); drw(MGRAY); doc.roundedRect(M,y,TW,bH,3,3,'FD');
-  const c1=M+5, c2=M+TW/3+5, c3=M+2*TW/3+5;
-  drw(MGRAY); doc.setLineWidth(0.3);
-  doc.line(M+TW/3,y+3,M+TW/3,y+bH-3);
-  doc.line(M+2*TW/3,y+3,M+2*TW/3,y+bH-3);
+  // ══════════════════════════════════════════════════════
+  // 2. AGENT / CUSTOMER  (compact single-line bar, 13 mm)
+  // ══════════════════════════════════════════════════════
+  fill(LGRAY); drw(MGRAY); lw(0.25);
+  doc.roundedRect(M,y,TW,13,2,2,'FD');
 
-  const infoBlock = (label,name,sub,cx) => {
-    bf(6.5,'bold'); txt(DGRAY); doc.text(label,cx,y+7);
-    bf(10,'bold');  txt(NAVY);  doc.text(name,cx,y+15);
-    if(sub){bf(8,'normal');txt(DGRAY);doc.text(sub,cx,y+22);}
+  // vertical dividers
+  drw([200,210,228]); lw(0.2);
+  doc.line(M+TW/3,   y+2, M+TW/3,   y+11);
+  doc.line(M+2*TW/3, y+2, M+2*TW/3, y+11);
+
+  const iBlock = (label, val, cx) => {
+    bf(5.5,'bold');  txt(DGRAY); doc.text(label, cx, y+5.5);
+    bf(8.5,'bold');  txt(NAVY);  doc.text(val,   cx, y+11);
   };
-  infoBlock('AGENT', agent+(agentCode?` [${agentCode}]`:''), null, c1);
-  infoBlock('CUSTOMER', custName, custContact||null, c2);
-  infoBlock('QUOTE DATE', today, 'Valid for 30 days', c3);
+  iBlock('AGENT',      agent+(agentCode?` [${agentCode}]`:''), M+4);
+  iBlock('CUSTOMER',   custName+(custContact?`   ${custContact}`:''),    M+TW/3+4);
+  iBlock('QUOTE DATE', today,                                            M+2*TW/3+4);
 
-  y += bH + 7;
+  y += 17;
 
-  // ─────────────────────────────────────────────────────
-  // 3. PRODUCT DETAILS BOX
-  // ─────────────────────────────────────────────────────
-  // Dark header strip with product name
-  fill(BLUE); doc.roundedRect(M,y,TW,11,2,2,'F');
-  bf(10.5); txt(WHITE);
-  doc.text(qr.product, M+6, y+7.5);
-  if(qr.plan){ bf(9,'normal'); txt(GOLD); doc.text(`Plan: ${qr.plan}`, W-M-4, y+7.5, {align:'right'}); }
+  // ══════════════════════════════════════════════════════
+  // 3. PRODUCT BANNER  (8 mm strip + 11 mm grid = 19 mm)
+  // ══════════════════════════════════════════════════════
+  fill(BLUE); doc.roundedRect(M,y,TW,8,2,2,'F');
+  bf(9.5); txt(WHITE); doc.text(qr.product, M+5, y+5.8);
+  if(qr.plan){
+    bf(8,'normal'); txt(GOLD);
+    doc.text(`Plan: ${qr.plan}`, W-M-4, y+5.8, {align:'right'});
+  }
+  y += 8;
 
-  y += 11;
-
-  // Light details grid below
-  fill([236,244,255]); drw([200,215,240]); doc.roundedRect(M,y,TW,18,0,0,'FD');
-  const details = [];
-  details.push(['Sum Insured', qr.siLabel||'—']);
-  details.push(['Zone', qr.zoneLabel||'—']);
-  details.push(['Coverage', qr.coverage==='floater'?'Family Floater':'Individual']);
-  if(qr.plan){ details.push(['Payment Mode', qr.mode||'Annual']); details.push(['Policy Term', `${qr.term} Year${qr.term>1?'s':''}`]); }
-  else { details.push(['Payment Mode', 'Annual']); details.push(['Policy Term', `${qr.term} Year${qr.term>1?'s':''}`]); }
-
-  const cols = details.length;
-  const cw = TW / cols;
-  details.forEach(([lbl,val],i) => {
-    const cx = M + i*cw + 4;
-    bf(6.5,'bold'); txt(DGRAY); doc.text(lbl.toUpperCase(), cx, y+6);
-    bf(8.5,'bold'); txt(NAVY);  doc.text(val, cx, y+14);
+  const details = [
+    ['Sum Insured', qr.siLabel||'—'],
+    ['Zone',        qr.zoneLabel||'—'],
+    ['Coverage',    qr.coverage==='floater'?'Family Floater':'Individual'],
+    ['Mode',        qr.mode||'Annual'],
+    ['Policy Term', `${qr.term} Yr${qr.term>1?'s':''}`],
+  ];
+  const dCols = details.length, dCW = TW/dCols;
+  fill([237,244,255]); drw([195,212,240]); lw(0.2);
+  doc.roundedRect(M,y,TW,11,0,0,'FD');
+  details.forEach(([l,v],i)=>{
+    const cx = M+i*dCW+3;
+    bf(5.5,'bold');  txt(DGRAY); doc.text(l.toUpperCase(), cx, y+4.5);
+    bf(8,'bold');    txt(NAVY);  doc.text(v, cx, y+9.5);
   });
+  y += 14;
 
-  y += 24;
-
-  // ─────────────────────────────────────────────────────
-  // 3b. COVERAGE HIGHLIGHTS
-  // ─────────────────────────────────────────────────────
-  const COVERAGE_HIGHLIGHTS = {
+  // ══════════════════════════════════════════════════════
+  // 3b. COVERAGE HIGHLIGHTS  — 5 compact pills in one row (12 mm)
+  // ══════════════════════════════════════════════════════
+  const CH = {
     yb: {
-      Basic: [
-        ['In-patient Hospitalisation',   'Room, ICU, surgery & nursing expenses covered'],
-        ['Pre & Post Hospitalisation',   '30 days pre / 60 days post discharge expenses'],
-        ['Day Care Procedures',          '541 day-care treatments without 24-hr admission'],
-        ['Emergency Ambulance',          'Road ambulance charges up to ₹2,000 per hospitalisation'],
-        ['Domiciliary Hospitalisation',  'Treatment at home if hospital admission not possible'],
-      ],
-      Gold: [
-        ['In-patient Hospitalisation',   'Room, ICU, surgery & nursing expenses covered'],
-        ['AYUSH Treatment',              'Ayurveda, Yoga, Unani, Siddha & Homeopathy covered'],
-        ['Organ Donor Expenses',         'Medical expenses of organ donor during harvesting'],
-        ['Day Care Procedures',          '541 day-care treatments without 24-hr admission'],
-        ['Cumulative Bonus',             '5% bonus on SI per claim-free year (up to 50%)'],
-      ],
-      Platinum: [
-        ['In-patient Hospitalisation',   'Room, ICU, surgery & nursing expenses covered'],
-        ['Maternity Benefit',            'Normal ₹35,000 / C-Section ₹50,000 (2-yr waiting period)'],
-        ['New Born Baby Cover',          'New born covered from day 1 within maternity benefit'],
-        ['AYUSH & Organ Donor',          'AYUSH treatment + organ donor harvesting expenses'],
-        ['Cumulative Bonus',             '5% bonus on SI per claim-free year (up to 50%)'],
-      ],
+      Basic:    ['In-patient Hospitalisation','Pre & Post Hospitalisation','Day Care Procedures','Emergency Ambulance','Domiciliary Hospitalisation'],
+      Gold:     ['In-patient Hospitalisation','AYUSH Treatment','Organ Donor Expenses','Day Care Procedures','Cumulative Bonus (up to 50%)'],
+      Platinum: ['In-patient Hospitalisation','Maternity & New Born Cover','AYUSH Treatment','Organ Donor Expenses','Cumulative Bonus (up to 50%)'],
     },
-    nif: [
-      ['Family Floater Cover',         'Single sum insured shared across all insured members'],
-      ['In-patient Hospitalisation',   'Room (1% of SI/day), ICU (2% of SI/day), surgery & nursing'],
-      ['Pre & Post Hospitalisation',   '30 days pre-hospitalisation / 60 days post-discharge'],
-      ['Day Care Procedures',          'Listed day-care procedures without 24-hr admission'],
-      ['Ambulance Charges',            'Emergency road ambulance up to ₹1,500 per hospitalisation'],
-    ],
+    nif: ['Family Floater Cover','In-patient Hospitalisation','Pre & Post Hospitalisation','Day Care Procedures','Ambulance Charges'],
   };
+  const hl = qr.plan ? (CH.yb[qr.plan]||CH.yb.Basic) : CH.nif;
 
-  const highlights = qr.plan
-    ? (COVERAGE_HIGHLIGHTS.yb[qr.plan] || COVERAGE_HIGHLIGHTS.yb.Basic)
-    : COVERAGE_HIGHLIGHTS.nif;
+  // label pill
+  fill(TEAL); doc.roundedRect(M,y,45,6,1.5,1.5,'F');
+  bf(6.5,'bold'); txt(WHITE); doc.text('COVERAGE HIGHLIGHTS', M+3, y+4.3);
 
-  // Section pill label
-  fill(BLUE); doc.roundedRect(M, y-5, 52, 8, 2, 2, 'F');
-  bf(8,'bold'); txt(WHITE); doc.text('COVERAGE HIGHLIGHTS', M+4, y);
-  y += 5;
-
-  // 5-cell grid (2 cols × 3 rows, last row may have 1 cell)
-  const hCols = 2, hCW = TW / hCols, hRH = 14;
-  highlights.forEach(([title, desc], idx) => {
-    const col = idx % hCols;
-    const row = Math.floor(idx / hCols);
-    const hx = M + col * hCW;
-    const hy = y + row * hRH;
-    // alternating bg
-    const bg = idx % 2 === 0 ? [245,248,255] : [255,255,255];
-    fill(bg); drw([210,220,238]); doc.setLineWidth(0.15);
-    doc.rect(hx, hy, hCW, hRH, 'FD');
-    // teal left accent
-    fill(TEAL); doc.rect(hx, hy, 3, hRH, 'F');
-    // bullet dot
-    fill(BLUE); doc.circle(hx+7, hy+5.5, 1, 'F');
-    // title
-    bf(8,'bold'); txt(NAVY); doc.text(title, hx+11, hy+6);
-    // desc
-    bf(7,'normal'); txt(DGRAY); doc.text(desc, hx+11, hy+11, {maxWidth: hCW-14});
+  y += 8;
+  const pCW = TW/5, pRH = 10;
+  hl.forEach((title,i)=>{
+    const px = M + i*pCW;
+    const bg = i%2===0 ? [241,246,255] : [255,255,255];
+    fill(bg); drw([195,212,240]); lw(0.15);
+    doc.rect(px, y, pCW, pRH, 'FD');
+    fill(TEAL); doc.rect(px, y, 2.5, pRH, 'F');       // teal accent
+    fill(BLUE); doc.circle(px+5.5, y+3.8, 0.9, 'F');  // bullet
+    bf(6.5,'bold'); txt(NAVY);
+    doc.text(title, px+8, y+4, {maxWidth: pCW-10});    // title may wrap
+    // if title wraps, pRH=10 keeps it tidy for short titles
   });
+  y += pRH + 5;
 
-  y += Math.ceil(highlights.length / hCols) * hRH + 8;
-
-  // ─────────────────────────────────────────────────────
-  // 4. BUILD TABLE ROWS + ROW TYPE METADATA
-  // ─────────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════
+  // 4. BUILD TABLE ROWS
   // row types: mhdr | base | hpd | hpl | mnet | gap | sub | disc | opt | total
+  // ══════════════════════════════════════════════════════
   const rows=[], rt=[];
-
-  const addRow = (label, val, type) => { rows.push([label, val]); rt.push(type); };
+  const addRow = (lbl,val,type) => { rows.push([lbl,val]); rt.push(type); };
 
   if (qr.plan) {
-    // ── Yuva Bharat ──
     qr.memberRows.forEach((r,i)=>{
-      if(i>0){ addRow('', '', 'gap'); }  // thin spacer between members
+      if(i>0) addRow('','','gap');
       addRow(`${r.name||'Member '+(i+1)}`, `Age: ${r.age}`, 'mhdr');
       addRow('Base Premium', `₹${Math.round(r.base).toLocaleString('en-IN')}`, 'base');
-
       (r.hpDiscounts||[]).forEach(d=>{
-        const amt = Math.abs(Math.round(r.base * d.pct/100));
-        const sign = d.pct < 0 ? '−' : '+';
-        const prefix = d.pct < 0 ? '↓ ' : '↑ ';
-        addRow(`${prefix}${d.label}  (${d.pct>0?'+':''}${d.pct}%)`,
-               `${sign} ₹${amt.toLocaleString('en-IN')}`, d.pct<0?'hpd':'hpl');
+        const amt=Math.abs(Math.round(r.base*d.pct/100));
+        addRow(`${d.pct<0?'↓':'↑'} ${d.label}  (${d.pct>0?'+':''}${d.pct}%)`,
+               `${d.pct<0?'−':'+'} ₹${amt.toLocaleString('en-IN')}`, d.pct<0?'hpd':'hpl');
       });
-
-      if((r.hpDiscounts||[]).length){
+      if((r.hpDiscounts||[]).length)
         addRow('Net Member Premium', `₹${Math.round(r.afterHP).toLocaleString('en-IN')}`, 'mnet');
-      }
     });
-
-    if(qr.memberRows.length>1 || qr.floaterDisc || qr.loyalty || qr.termDisc){
-      addRow(['',''], '', 'gap');
+    if(qr.memberRows.length>1||qr.floaterDisc||qr.loyalty||qr.termDisc){
+      addRow('','','gap');
       addRow('Sub-total  (All Members)', `₹${Math.round(qr.subtotal).toLocaleString('en-IN')}`, 'sub');
     }
     if(qr.floaterDisc){
-      const n=qr.mems.length, p=qr.floaterDisc*100;
+      const n=qr.mems.length,p=qr.floaterDisc*100;
       addRow(`↓ Family Floater Discount — ${n} Members  (−${p}%)`,
              `− ₹${Math.round(qr.subtotal*qr.floaterDisc).toLocaleString('en-IN')}`, 'disc');
     }
-    if(qr.loyalty){
+    if(qr.loyalty)
       addRow('↓ Loyalty Discount (−2.5%)  —  Existing NIA Policy ≥ ₹5,000',
              `− ₹${Math.round(qr.afterFloater*0.025).toLocaleString('en-IN')}`, 'disc');
-    }
-    if(qr.termDisc){
+    if(qr.termDisc)
       addRow(`↓ Long-Term Discount — ${qr.term} Years  (−${qr.termDisc*100}%)`,
              `− ₹${Math.round(qr.afterLoyalty*qr.termDisc).toLocaleString('en-IN')}`, 'disc');
-    }
-    if(qr.maternity){
+    if(qr.maternity)
       addRow(`★ Optional: Enhanced Maternity  (${qr.matLabel})`,
              `₹${Math.round(qr.matPrem).toLocaleString('en-IN')}`, 'opt');
-    }
     addRow(`TOTAL ${(qr.mode||'').toUpperCase()} PREMIUM`,
            `₹${Math.round(qr.grandTotal).toLocaleString('en-IN')}`, 'total');
-
   } else {
-    // ── NI Floater ──
     qr.memberRows.forEach((r,i)=>{
-      if(i>0){ addRow('', '', 'gap'); }
+      if(i>0) addRow('','','gap');
       addRow(`${r.name||'Member '+(i+1)}`, `Age: ${r.age}`, 'mhdr');
       addRow('Annual Base Premium', `₹${Math.round(r.base).toLocaleString('en-IN')}`, 'base');
-      if(qr.cataract && r.catPrem){
+      if(qr.cataract&&r.catPrem){
         addRow('★ Optional: Cataract Cover (Revised Limit)',
                `₹${Math.round(r.catPrem).toLocaleString('en-IN')}`, 'opt');
         addRow('Member Sub-total',
                `₹${Math.round(r.base+r.catPrem).toLocaleString('en-IN')}`, 'mnet');
       }
     });
-    addRow('', '', 'gap');
+    addRow('','','gap');
     addRow('Sub-total  (All Members)', `₹${Math.round(qr.combined).toLocaleString('en-IN')}`, 'sub');
     if(qr.floaterDisc){
-      const n=qr.mems.length, p=qr.floaterDisc*100;
+      const n=qr.mems.length,p=qr.floaterDisc*100;
       addRow(`↓ Family Floater Discount — ${n} Members  (−${p}%)`,
              `− ₹${Math.round(qr.combined*qr.floaterDisc).toLocaleString('en-IN')}`, 'disc');
     }
-    if(qr.termDisc){
+    if(qr.termDisc)
       addRow(`↓ Long-Term Discount — ${qr.term} Years  (−${qr.termDisc*100}%)`,
              `− ₹${Math.round(qr.afterFloater*qr.termDisc).toLocaleString('en-IN')}`, 'disc');
-    }
     addRow('TOTAL ANNUAL PREMIUM', `₹${Math.round(qr.afterTerm).toLocaleString('en-IN')}`, 'total');
   }
 
-  // ─────────────────────────────────────────────────────
-  // 5. SECTION HEADING
-  // ─────────────────────────────────────────────────────
-  // Pill-style section label
-  fill(TEAL); doc.roundedRect(M, y-5, 52, 8, 2, 2, 'F');
-  bf(8,'bold'); txt(WHITE);
-  doc.text('PREMIUM BREAKDOWN', M+4, y);
-  y += 7;
+  // ══════════════════════════════════════════════════════
+  // 5. SECTION LABEL
+  // ══════════════════════════════════════════════════════
+  fill(TEAL); doc.roundedRect(M,y,48,6,1.5,1.5,'F');
+  bf(6.5,'bold'); txt(WHITE); doc.text('PREMIUM BREAKDOWN', M+3, y+4.3);
+  y += 8;
 
-  // ─────────────────────────────────────────────────────
-  // 6. AUTO TABLE
-  // ─────────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════
+  // 6. AUTO TABLE  (compact rows)
+  // ══════════════════════════════════════════════════════
   doc.autoTable({
     body: rows,
     startY: y, margin:{left:M,right:M}, tableWidth:TW,
-    styles:{fontSize:9, cellPadding:{top:4,bottom:4,left:8,right:8},
-            lineColor:[220,228,240], lineWidth:0.2, valign:'middle', overflow:'linebreak'},
+    styles:{fontSize:8, cellPadding:{top:3,bottom:3,left:7,right:7},
+            lineColor:[215,225,242], lineWidth:0.18, valign:'middle', overflow:'linebreak'},
     columnStyles:{
       0:{cellWidth:TW*0.68},
-      1:{cellWidth:TW*0.32, halign:'right'}
+      1:{cellWidth:TW*0.32, halign:'right'},
     },
-    didParseCell(data){
-      const type = rt[data.row.index];
-      const isAmt = data.column.index===1;
+    didParseCell(d){
+      const type=rt[d.row.index], isAmt=d.column.index===1;
       switch(type){
         case 'gap':
-          data.cell.styles.fillColor   = [240,244,250];
-          data.cell.styles.cellPadding = {top:1,bottom:1,left:0,right:0};
-          data.cell.styles.lineWidth   = 0;
+          d.cell.styles.fillColor   = [232,238,250];
+          d.cell.styles.cellPadding = {top:1,bottom:1,left:0,right:0};
+          d.cell.styles.lineWidth   = 0;
           break;
         case 'mhdr':
-          data.cell.styles.fillColor   = [30,64,175];
-          data.cell.styles.textColor   = WHITE;
-          data.cell.styles.fontStyle   = 'bold';
-          data.cell.styles.fontSize    = 9.5;
-          data.cell.styles.cellPadding = {top:5.5,bottom:5.5,left:8,right:8};
-          // col 0 = name (bold), col 1 = age (right-aligned smaller)
-          if(isAmt){ data.cell.styles.fontSize=8.5; data.cell.styles.textColor=[180,200,240]; }
+          d.cell.styles.fillColor   = BLUE;
+          d.cell.styles.textColor   = WHITE;
+          d.cell.styles.fontStyle   = 'bold';
+          d.cell.styles.fontSize    = 8.5;
+          d.cell.styles.cellPadding = {top:4,bottom:4,left:7,right:7};
+          if(isAmt){ d.cell.styles.fontSize=7.5; d.cell.styles.textColor=[185,205,245]; }
           break;
         case 'base':
-          data.cell.styles.fillColor = WHITE;
-          data.cell.styles.textColor = isAmt ? [15,23,42] : [55,65,81];
-          data.cell.styles.fontStyle = isAmt ? 'bold' : 'normal';
-          data.cell.styles.cellPadding = {top:4,bottom:4,left:16,right:8};
+          d.cell.styles.fillColor   = WHITE;
+          d.cell.styles.textColor   = isAmt?NAVY:[55,65,81];
+          d.cell.styles.fontStyle   = isAmt?'bold':'normal';
+          d.cell.styles.cellPadding = {top:3,bottom:3,left:15,right:7};
           break;
         case 'hpd':
-          data.cell.styles.fillColor   = LGREEN;
-          data.cell.styles.textColor   = DGREEN;
-          data.cell.styles.fontSize    = 8.5;
-          data.cell.styles.fontStyle   = isAmt?'bold':'normal';
-          data.cell.styles.cellPadding = {top:3.5,bottom:3.5,left:16,right:8};
+          d.cell.styles.fillColor   = LGREEN;
+          d.cell.styles.textColor   = DGREEN;
+          d.cell.styles.fontSize    = 7.5;
+          d.cell.styles.fontStyle   = isAmt?'bold':'normal';
+          d.cell.styles.cellPadding = {top:2.5,bottom:2.5,left:15,right:7};
           break;
         case 'hpl':
-          data.cell.styles.fillColor   = LRED;
-          data.cell.styles.textColor   = RED;
-          data.cell.styles.fontSize    = 8.5;
-          data.cell.styles.fontStyle   = isAmt?'bold':'normal';
-          data.cell.styles.cellPadding = {top:3.5,bottom:3.5,left:16,right:8};
+          d.cell.styles.fillColor   = LRED;
+          d.cell.styles.textColor   = RED;
+          d.cell.styles.fontSize    = 7.5;
+          d.cell.styles.fontStyle   = isAmt?'bold':'normal';
+          d.cell.styles.cellPadding = {top:2.5,bottom:2.5,left:15,right:7};
           break;
         case 'mnet':
-          data.cell.styles.fillColor   = [235,242,255];
-          data.cell.styles.textColor   = [15,23,42];
-          data.cell.styles.fontStyle   = 'bold';
-          data.cell.styles.fontSize    = 9;
-          data.cell.styles.cellPadding = {top:4.5,bottom:4.5,left:16,right:8};
+          d.cell.styles.fillColor   = MBLUE;
+          d.cell.styles.textColor   = [15,23,42];
+          d.cell.styles.fontStyle   = 'bold';
+          d.cell.styles.fontSize    = 8;
+          d.cell.styles.cellPadding = {top:3,bottom:3,left:15,right:7};
           break;
         case 'sub':
-          data.cell.styles.fillColor   = [215,228,252];
-          data.cell.styles.textColor   = [15,23,42];
-          data.cell.styles.fontStyle   = 'bold';
-          data.cell.styles.fontSize    = 9.5;
-          data.cell.styles.cellPadding = {top:5,bottom:5,left:8,right:8};
+          d.cell.styles.fillColor   = [210,225,255];
+          d.cell.styles.textColor   = NAVY;
+          d.cell.styles.fontStyle   = 'bold';
+          d.cell.styles.fontSize    = 8.5;
+          d.cell.styles.cellPadding = {top:4,bottom:4,left:7,right:7};
           break;
         case 'disc':
-          data.cell.styles.fillColor   = LGREEN;
-          data.cell.styles.textColor   = DGREEN;
-          data.cell.styles.fontStyle   = isAmt?'bold':'normal';
-          data.cell.styles.cellPadding = {top:4,bottom:4,left:16,right:8};
+          d.cell.styles.fillColor   = LGREEN;
+          d.cell.styles.textColor   = DGREEN;
+          d.cell.styles.fontStyle   = isAmt?'bold':'normal';
+          d.cell.styles.cellPadding = {top:3,bottom:3,left:15,right:7};
           break;
         case 'opt':
-          data.cell.styles.fillColor   = LGOLD;
-          data.cell.styles.textColor   = DGOLD;
-          data.cell.styles.fontStyle   = isAmt?'bold':'normal';
-          data.cell.styles.cellPadding = {top:4,bottom:4,left:16,right:8};
+          d.cell.styles.fillColor   = LGOLD;
+          d.cell.styles.textColor   = DGOLD;
+          d.cell.styles.fontStyle   = isAmt?'bold':'normal';
+          d.cell.styles.cellPadding = {top:3,bottom:3,left:15,right:7};
           break;
         case 'total':
-          data.cell.styles.fillColor   = NAVY;
-          data.cell.styles.textColor   = GOLD;
-          data.cell.styles.fontStyle   = 'bold';
-          data.cell.styles.fontSize    = 11.5;
-          data.cell.styles.cellPadding = {top:7,bottom:7,left:8,right:8};
+          d.cell.styles.fillColor   = NAVY;
+          d.cell.styles.textColor   = GOLD;
+          d.cell.styles.fontStyle   = 'bold';
+          d.cell.styles.fontSize    = 10.5;
+          d.cell.styles.cellPadding = {top:6,bottom:6,left:7,right:7};
           break;
       }
     }
   });
 
-  y = doc.lastAutoTable.finalY + 10;
+  y = doc.lastAutoTable.finalY + 4;
 
-  // ─────────────────────────────────────────────────────
-  // 7. NOTES
-  // ─────────────────────────────────────────────────────
-  const pH2 = doc.internal.pageSize.height;
-  if(y+28 > pH2-18){ doc.addPage(); y=16; }
-
-  const notes=['• GST: Nil — effective 22nd September 2025.',
-    '• [D] = Discount applied  |  [L] = Loading applied on base premium for that member.',
-    '• Health parameter adjustments apply only to members aged 18 years and above (Yuva Bharat).',
-    '• This is an indicative quotation. Final premium is subject to insurer underwriting & policy issuance.'];
-  if(qr.zoneLabel&&qr.zoneLabel.includes('Zone 2')&&!qr.plan)
-    notes.splice(0,0,'• Co-payment: 20% applies if Zone 2 insured members avail treatment at Zone 1 (Maharashtra/Gujarat) hospitals.');
-
-  bf(7.5,'normal'); txt(DGRAY);
-  notes.forEach(n=>{ doc.text(n,M,y); y+=4.8; });
-
-  // ─────────────────────────────────────────────────────
-  // 8. FOOTER
-  // ─────────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════
+  // 7. COMPACT NOTES (above footer)
+  // ══════════════════════════════════════════════════════
   const fH = doc.internal.pageSize.height;
-  fill(NAVY);  doc.rect(0,fH-15,W,15,'F');
-  fill(TEAL);  doc.rect(0,fH-16,W,1,'F');
-  fill(GOLD);  doc.rect(0,fH-15,5,15,'F');
-  bf(7,'normal'); txt([148,163,184]);
-  doc.text('This is a computer-generated premium quotation. Subject to policy terms & conditions.', W/2, fH-9, {align:'center'});
-  bf(7.5,'bold'); txt(GOLD);
-  doc.text(`Generated by: ${agent}${agentCode?' ['+agentCode+']':''}  ·  ${today}`, W/2, fH-4, {align:'center'});
+  const notesY = fH - 20;   // 8mm note area sits just above 12mm footer
+
+  const notes = ['GST: Nil (w.e.f. 22 Sept 2025)  ·  ↓ = Discount  ↑ = Loading  ·  HP adjustments apply to members aged 18+ only (Yuva Bharat)'];
+  if(qr.zoneLabel&&qr.zoneLabel.includes('Zone 2')&&!qr.plan)
+    notes.push('Co-payment: 20% if Zone 2 insured treated at Zone 1 (Maharashtra/Gujarat) hospital');
+  notes.push('Indicative quotation. Final premium subject to insurer underwriting & policy issuance.');
+
+  bf(6.5,'normal'); txt(DGRAY);
+  notes.forEach((n,i)=>{ doc.text(`• ${n}`, M, notesY+i*4); });
+
+  // ══════════════════════════════════════════════════════
+  // 8. FOOTER
+  // ══════════════════════════════════════════════════════
+  fill(NAVY); doc.rect(0,fH-12,W,12,'F');
+  fill(TEAL); doc.rect(0,fH-12.8,W,0.8,'F');
+  fill(GOLD); doc.rect(0,fH-12,4,12,'F');
+  bf(6.5,'normal'); txt([155,170,195]);
+  doc.text('Computer-generated quotation · Subject to policy terms & conditions', W/2, fH-7.5, {align:'center'});
+  bf(7,'bold'); txt(GOLD);
+  doc.text(`${agent}${agentCode?' ['+agentCode+']':''}   ·   ${today}`, W/2, fH-3, {align:'center'});
 
   doc.save(`Quote_${custName.replace(/\s+/g,'_')}_${today.replace(/\s/g,'')}.pdf`);
 }
